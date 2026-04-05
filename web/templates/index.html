@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JDM Config Web - Настройка автомобилей 90-х и 00-х</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏎️ JDM Config Web</h1>
+            <p class="subtitle">Сервис для заказа автомобилей из 90-х и 00-х с индивидуальной настройкой</p>
+        </header>
+
+        <nav class="main-menu">
+            <a href="/configurator" class="menu-card">
+                <div class="menu-icon">🚗</div>
+                <h2>Конфигуратор</h2>
+                <p>Настройте автомобиль по своему вкусу</p>
+            </a>
+
+            <a href="/orders" class="menu-card">
+                <div class="menu-icon">📋</div>
+                <h2>Мои заказы</h2>
+                <p>Просмотр статуса ваших заказов</p>
+            </a>
+
+            <div class="menu-card about-card" onclick="showAbout()">
+                <div class="menu-icon">ℹ️</div>
+                <h2>О сервисе</h2>
+                <p>Узнайте больше о нас</p>
+            </div>
+        </nav>
+
+        <!-- About Modal -->
+        <div id="aboutModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close" onclick="closeAbout()">&times;</span>
+                <h2>ℹ️ О сервисе</h2>
+                <p>Мы помогаем заказать автомобили из 90-х и 00-х с индивидуальной настройкой:</p>
+                <ul>
+                    <li>Подбор двигателя и тюнинга</li>
+                    <li>Настройка подвески</li>
+                    <li>Установка обвесов</li>
+                    <li>Подбор колёсных дисков</li>
+                </ul>
+                <p>Все работы выполняются профессиональными мастерами с опытом работы с JDM автомобилями.</p>
+                <p class="contact-info">📞 Для связи с менеджером: <a href="mailto:manager@example.com">manager@example.com</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -445,5 +445,60 @@
     "status": "completed",
     "created_at": "2026-04-04 14:59:54",
     "updated_at": "2026-04-04 15:00:17"
+  },
+  {
+    "id": "ORD-0009",
+    "user_id": "web-user",
+    "username": "Web User",
+    "car": {
+      "description": "Культовый полноприводный седан с оппозитным EJ20 с турбонаддувом",
+      "id": "impreza",
+      "image": "https://example.com/impreza.jpg",
+      "name": "Subaru Impreza WRX STI (GC8)",
+      "years": "1998-2000"
+    },
+    "engine": {
+      "description": "Стоковый оппозит с турбо",
+      "id": "ej20-stock",
+      "name": "EJ20 Stock",
+      "power": "280 л.с."
+    },
+    "suspension": {
+      "id": "drift",
+      "camber": "-2.0° перед / -1.0° зад",
+      "dampening": "Жёсткая перед / средняя зад",
+      "description": "Настройка для дрифта с увеличенным углом выворота",
+      "name": "Drift Spec",
+      "ride_height": "-60 мм",
+      "spring_rate": "10-12 кг/мм",
+      "use_case": "Дрифт, соревнования"
+    },
+    "bodykit": {
+      "components": [
+        "Карбоновый капот",
+        "Передний бампер с канардами",
+        "Задний диффузор",
+        "GT Wing",
+        "Пороги"
+      ],
+      "description": "Японский премиум обвес, разработан на треке",
+      "id": "varis",
+      "name": "VARIS",
+      "price_range": "$3000-5000",
+      "style": "Аэродинамический трековый"
+    },
+    "wheels": {
+      "description": "Легендарные кованые диски, икона JDM",
+      "id": "rays_volk",
+      "name": "Rays Volk Racing TE37",
+      "price_range": "$1200-1800/комплект",
+      "sizes": "17x9 / 18x9.5 / 18x10.5",
+      "style": "6 спиц",
+      "weight": "7.2 кг (17\")"
+    },
+    "notes": "",
+    "status": "cancelled",
+    "created_at": "2026-04-05 20:32:39",
+    "updated_at": "2026-04-05 20:46:39"
   }
 ]

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - Панель сервиса JDM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔧 Панель сервиса</h1>
+            <p class="subtitle">Система управления заказами JDM Config</p>
+        </header>
+
+        <!-- Login Form -->
+        <div id="adminLogin" class="login-form">
+            <h2>🔐 Вход в панель сервиса</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" class="input-field" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <p id="loginError" class="error-message hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_auth.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказы - Панель сервиса JDM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📋 Управление заказами</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link">Дашборд</a>
+                <a href="/orders" class="nav-link active">Заказы</a>
+                <a href="/stats" class="nav-link">Статистика</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+            </nav>
+        </header>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="btn btn-filter active" onclick="filterOrders('all')">Все заказы</button>
+            <button class="btn btn-filter" onclick="filterOrders('new')">🆕 Новые</button>
+            <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 В работе</button>
+            <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Выполнены</button>
+            <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Отменены</button>
+        </div>
+
+        <!-- Orders List -->
+        <div id="adminOrdersList" class="admin-orders-list">
+            <p class="loading">Загрузка заказов...</p>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="orderDetail"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_orders.js') }}"></script>
+</body>
+</html>

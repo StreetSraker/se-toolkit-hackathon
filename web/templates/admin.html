@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель сервиса - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link">← Назад</a>
+            <h1>🔧 Панель сервиса</h1>
+        </header>
+
+        <!-- Login Form -->
+        <div id="adminLogin" class="login-form">
+            <h2>🔐 Вход в панель сервиса</h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" class="input-field" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Войти</button>
+                <p id="loginError" class="error-message hidden"></p>
+            </form>
+        </div>
+
+        <!-- Admin Dashboard (hidden until login) -->
+        <div id="adminDashboard" class="hidden">
+            <div class="admin-header">
+                <h2>Панель управления</h2>
+                <button class="btn btn-secondary" onclick="handleLogout()">Выйти</button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotal">0</div>
+                    <div class="stat-label">Всего заказов</div>
+                </div>
+                <div class="stat-card stat-new">
+                    <div class="stat-number" id="statNew">0</div>
+                    <div class="stat-label">🆕 Новые</div>
+                </div>
+                <div class="stat-card stat-progress">
+                    <div class="stat-number" id="statProgress">0</div>
+                    <div class="stat-label">🔧 В работе</div>
+                </div>
+                <div class="stat-card stat-completed">
+                    <div class="stat-number" id="statCompleted">0</div>
+                    <div class="stat-label">✅ Выполнены</div>
+                </div>
+                <div class="stat-card stat-cancelled">
+                    <div class="stat-number" id="statCancelled">0</div>
+                    <div class="stat-label">❌ Отменены</div>
+                </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="filter-buttons">
+                <button class="btn btn-filter active" onclick="filterOrders('all')">Все заказы</button>
+                <button class="btn btn-filter" onclick="filterOrders('new')">🆕 Новые</button>
+                <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 В работе</button>
+                <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Выполнены</button>
+                <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Отменены</button>
+                <a href="/admin/stats" class="btn btn-filter">📊 Статистика</a>
+            </div>
+
+            <!-- Orders List -->
+            <div id="adminOrdersList" class="admin-orders-list">
+                <p class="loading">Загрузка заказов...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="orderDetail"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+</body>
+</html>

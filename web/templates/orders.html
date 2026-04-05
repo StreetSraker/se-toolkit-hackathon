@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заказы - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link">← Назад</a>
+            <h1>📋 Мои заказы</h1>
+        </header>
+
+        <div id="ordersList" class="orders-list">
+            <p class="loading">Загрузка заказов...</p>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/configurator" class="btn btn-primary">🚗 Конфигуратор</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
+</body>
+</html>

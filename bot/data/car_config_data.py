@@ -4,70 +4,70 @@ CARS = [
         "id": "supra",
         "name": "Toyota Supra A80",
         "years": "1993-2002",
-        "image": "https://example.com/supra.jpg",
+        "image": "/static/images/cars/supra.svg",
         "description": "Легендарный японский спорткар с рядной шестеркой 2JZ-GTE"
     },
     {
         "id": "skyline",
         "name": "Nissan Skyline R34 GT-R",
         "years": "1999-2002",
-        "image": "https://example.com/skyline.jpg",
+        "image": "/static/images/cars/skyline.svg",
         "description": "Godzilla - легендарный полноприводный спорткар с RB26DETT"
     },
     {
         "id": "rx7",
         "name": "Mazda RX-7 FD",
         "years": "1992-2002",
-        "image": "https://example.com/rx7.jpg",
+        "image": "/static/images/cars/rx7.svg",
         "description": "Спорткар с роторно-поршневым двигателем 13B-REW"
     },
     {
         "id": "nsx",
         "name": "Honda NSX (NA1/NA2)",
         "years": "1990-2005",
-        "image": "https://example.com/nsx.jpg",
+        "image": "/static/images/cars/nsx.svg",
         "description": "Среднемоторный суперкар с V6 VTEC, разработан при участии Айртона Сенны"
     },
     {
         "id": "silvia",
         "name": "Nissan Silvia S15",
         "years": "1999-2002",
-        "image": "https://example.com/silvia.jpg",
+        "image": "/static/images/cars/silvia.svg",
         "description": "Идеальный автомобиль для дрифта с двигателем SR20DET"
     },
     {
         "id": "chaser",
         "name": "Toyota Chaser JZX100",
         "years": "1996-2001",
-        "image": "https://example.com/chaser.jpg",
+        "image": "/static/images/cars/chaser.svg",
         "description": "Седан с легендарным 1JZ-GTE, популярная платформа для тюнинга"
     },
     {
         "id": "civic",
         "name": "Honda Civic Type R (EK9)",
         "years": "1997-2000",
-        "image": "https://example.com/civic.jpg",
+        "image": "/static/images/cars/civic.svg",
         "description": "Легендарный хэтчбек с высокооборотистым B16B VTEC"
     },
     {
         "id": "evo",
         "name": "Mitsubishi Lancer Evolution VI",
         "years": "1999-2001",
-        "image": "https://example.com/evo.jpg",
+        "image": "/static/images/cars/evo.svg",
         "description": "Раллийный чемпион с 4G63T и продвинутым полным приводом AYC"
     },
     {
         "id": "impreza",
         "name": "Subaru Impreza WRX STI (GC8)",
         "years": "1998-2000",
-        "image": "https://example.com/impreza.jpg",
+        "image": "/static/images/cars/impreza.svg",
         "description": "Культовый полноприводный седан с оппозитным EJ20 с турбонаддувом"
     },
     {
         "id": "ae86",
         "name": "Toyota Sprinter Trueno AE86",
         "years": "1983-1987",
-        "image": "https://example.com/ae86.jpg",
+        "image": "/static/images/cars/ae86.svg",
         "description": "Легенда дрифта с двигателем 4A-GE, звезда Initial D"
     }
 ]
