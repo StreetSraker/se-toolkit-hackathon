@@ -86,7 +86,7 @@ function displaySuspensions(suspensions) {
     
     engineInfo.innerHTML = `
         <h3>${configData.engine.name}</h3>
-        <p><strong>Мощность:</strong> ${configData.engine.power}</p>
+        <p><strong>Power:</strong> ${configData.engine.power}</p>
         <p>${configData.engine.description}</p>
     `;
     
@@ -95,11 +95,11 @@ function displaySuspensions(suspensions) {
             <h3>${susp.name}</h3>
             <p>${susp.description}</p>
             <div class="option-details">
-                <p><strong>Клиренс:</strong> ${susp.ride_height}</p>
-                <p><strong>Амортизация:</strong> ${susp.dampening}</p>
-                <p><strong>Пружины:</strong> ${susp.spring_rate}</p>
-                <p><strong>Развал:</strong> ${susp.camber}</p>
-                <p><strong>Применение:</strong> ${susp.use_case}</p>
+                <p><strong>Clearance:</strong> ${susp.ride_height}</p>
+                <p><strong>Dampening:</strong> ${susp.dampening}</p>
+                <p><strong>Springs:</strong> ${susp.spring_rate}</p>
+                <p><strong>Camber:</strong> ${susp.camber}</p>
+                <p><strong>Use case:</strong> ${susp.use_case}</p>
             </div>
         </div>
     `).join('');
@@ -129,17 +129,21 @@ function displayBodykits(bodykits) {
     suspInfo.innerHTML = `
         <h3>${configData.suspension.name}</h3>
         <p>${configData.suspension.description}</p>
-        <p><strong>Клиренс:</strong> ${configData.suspension.ride_height}</p>
+        <p><strong>Clearance:</strong> ${configData.suspension.ride_height}</p>
     `;
     
     container.innerHTML = bodykits.map(bk => `
         <div class="option-card" onclick="selectBodykit('${bk.id}')">
+            ${bk.image ? `
+            <div class="option-card-image" style="height: 160px; border-radius: 8px; margin-bottom: 12px; overflow: hidden; background: #2a2a3e;">
+                <img src="${bk.image}" alt="${bk.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>` : ''}
             <h3>${bk.name}</h3>
             <p>${bk.description}</p>
-            <p><strong>Стиль:</strong> ${bk.style}</p>
+            <p><strong>Style:</strong> ${bk.style}</p>
             <ul class="option-components">
                 ${bk.components.slice(0, 4).map(c => `<li>${c}</li>`).join('')}
-                ${bk.components.length > 4 ? `<li>...и ещё ${bk.components.length - 4}</li>` : ''}
+                ${bk.components.length > 4 ? `<li>...and ${bk.components.length - 4} more</li>` : ''}
             </ul>
         </div>
     `).join('');
@@ -169,17 +173,21 @@ function displayWheels(wheels) {
     bodykitInfo.innerHTML = `
         <h3>${configData.bodykit.name}</h3>
         <p>${configData.bodykit.description}</p>
-        <p><strong>Стиль:</strong> ${configData.bodykit.style}</p>
+        <p><strong>Style:</strong> ${configData.bodykit.style}</p>
     `;
     
     container.innerHTML = wheels.map(wheel => `
         <div class="option-card" onclick="selectWheel('${wheel.id}')">
+            ${wheel.image ? `
+            <div class="option-card-image" style="height: 160px; border-radius: 8px; margin-bottom: 12px; overflow: hidden; background: #2a2a3e;">
+                <img src="${wheel.image}" alt="${wheel.name}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>` : ''}
             <h3>${wheel.name}</h3>
             <p>${wheel.description}</p>
             <div class="option-details">
-                <p><strong>Размеры:</strong> ${wheel.sizes}</p>
-                <p><strong>Вес:</strong> ${wheel.weight}</p>
-                <p><strong>Стиль:</strong> ${wheel.style}</p>
+                <p><strong>Sizes:</strong> ${wheel.sizes}</p>
+                <p><strong>Weight:</strong> ${wheel.weight}</p>
+                <p><strong>Style:</strong> ${wheel.style}</p>
             </div>
         </div>
     `).join('');
@@ -199,23 +207,23 @@ function showSummary() {
     const summary = document.getElementById('configSummary');
     summary.innerHTML = `
         <div class="summary-item">
-            <strong>🚗 Авто:</strong>
+            <strong>🚗 Car:</strong>
             <span>${configData.car.name} (${configData.car.years})</span>
         </div>
         <div class="summary-item">
-            <strong>⚙️ Двигатель:</strong>
+            <strong>⚙️ Engine:</strong>
             <span>${configData.engine.name} — ${configData.engine.power}</span>
         </div>
         <div class="summary-item">
-            <strong>🔧 Подвеска:</strong>
+            <strong>🔧 Suspension:</strong>
             <span>${configData.suspension.name}</span>
         </div>
         <div class="summary-item">
-            <strong>🎨 Обвес:</strong>
+            <strong>🎨 Bodykit:</strong>
             <span>${configData.bodykit.name}</span>
         </div>
         <div class="summary-item">
-            <strong>🛞 Диски:</strong>
+            <strong>🛞 Wheels:</strong>
             <span>${configData.wheels.name}</span>
         </div>
     `;
@@ -233,14 +241,14 @@ async function submitOrder() {
         
         if (response.ok) {
             const order = await response.json();
-            alert(`✅ Заказ #${order.id} оформлен!\n\nСкоро свяжется менеджер. Спасибо! 🚗`);
+            alert(`✅ Order #${order.id} placed!\n\nA manager will contact you soon. Thank you! 🚗`);
             window.location.href = '/orders';
         } else {
-            alert('❌ Ошибка при оформлении заказа');
+            alert('❌ Error placing order');
         }
     } catch (error) {
         console.error('Error submitting order:', error);
-        alert('❌ Ошибка при оформлении заказа');
+        alert('❌ Error placing order');
     }
 }
 

@@ -37,11 +37,11 @@ async function handleLogin(event) {
         if (data.success) {
             window.location.href = '/dashboard';
         } else {
-            errorMsg.textContent = '❌ Неверный пароль';
+            errorMsg.textContent = '❌ Incorrect password';
             errorMsg.classList.remove('hidden');
         }
     } catch (error) {
-        errorMsg.textContent = '❌ Ошибка при входе';
+        errorMsg.textContent = '❌ Login error';
         errorMsg.classList.remove('hidden');
     }
 }

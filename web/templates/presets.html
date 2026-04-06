@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ready-Made Builds - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="/" class="back-link">← Back</a>
+            <h1>🏆 Ready-Made Builds</h1>
+            <p class="header-subtitle">Pre-configured setups from our craftsmen — choose and order</p>
+        </header>
+
+        <!-- Filter Buttons -->
+        <div class="filter-buttons" id="filterButtons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="drift">🔥 Drift</button>
+            <button class="filter-btn" data-filter="track">🏁 Track</button>
+            <button class="filter-btn" data-filter="street">🌃 Street</button>
+            <button class="filter-btn" data-filter="rally">🏔️ Rally</button>
+            <button class="filter-btn" data-filter="stance">📸 Stance</button>
+            <button class="filter-btn" data-filter="touge">🌙 Toge</button>
+        </div>
+
+        <!-- Presets Grid -->
+        <div class="options-grid options-grid-cars" id="presetsGrid"></div>
+
+        <!-- Preset Detail Modal -->
+        <div class="modal hidden" id="presetModal">
+            <div class="modal-content modal-large">
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/presets.js') }}"></script>
+</body>
+</html>

@@ -37,7 +37,7 @@ async function loadStatsDashboard() {
         displayStats(stats);
     } catch (error) {
         console.error('Error loading stats:', error);
-        container.innerHTML = '<p class="loading">Ошибка при загрузке статистики</p>';
+        container.innerHTML = '<p class="loading">Error loading statistics</p>';
     }
 }
 
@@ -50,43 +50,43 @@ function displayStats(stats) {
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number">${stats.total}</div>
-                <div class="stat-label">Всего заказов</div>
+                <div class="stat-label">Total orders</div>
             </div>
             <div class="stat-card stat-new">
                 <div class="stat-number">${stats.new}</div>
-                <div class="stat-label">🆕 Новые</div>
+                <div class="stat-label">🆕 New</div>
             </div>
             <div class="stat-card stat-progress">
                 <div class="stat-number">${stats.in_progress}</div>
-                <div class="stat-label">🔧 В работе</div>
+                <div class="stat-label">🔧 In Progress</div>
             </div>
             <div class="stat-card stat-completed">
                 <div class="stat-number">${stats.completed}</div>
-                <div class="stat-label">✅ Выполнены</div>
+                <div class="stat-label">✅ Completed</div>
             </div>
             <div class="stat-card stat-cancelled">
                 <div class="stat-number">${stats.cancelled}</div>
-                <div class="stat-label">❌ Отменены</div>
+                <div class="stat-label">❌ Cancelled</div>
             </div>
         </div>
         
         <div style="margin-top: 40px;">
-            <h2 style="color: #ff6b6b; margin-bottom: 20px;">🏆 Популярные автомобили</h2>
+            <h2 style="color: #64748b; margin-bottom: 20px;">🏆 Popular cars</h2>
             <ul class="popular-cars-list">
                 ${stats.popular_cars.map((car, index) => `
                     <li>
                         <span class="car-name">${index + 1}. ${car.name}</span>
-                        <span class="car-count">${car.count} шт.</span>
+                        <span class="car-count">${car.count} units</span>
                     </li>
                 `).join('')}
             </ul>
         </div>
         
         <div class="conversion-info">
-            <h3>📈 Конверсия</h3>
+            <h3>📈 Conversion</h3>
             <div class="conversion-rate">${stats.completed}/${stats.total} (${conversionRate}%)</div>
             <p style="margin-top: 10px; color: #a0a0a0;">
-                Процент выполненных заказов от общего количества
+                Percentage of completed orders out of total
             </p>
         </div>
     `;

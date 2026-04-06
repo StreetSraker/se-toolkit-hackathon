@@ -38,14 +38,14 @@ async function loadAdminOrders(status = 'all') {
         const orders = await response.json();
         
         if (orders.length === 0) {
-            container.innerHTML = '<p class="loading">📋 Заказов нет</p>';
+            container.innerHTML = '<p class="loading">📋 No orders</p>';
             return;
         }
         
         displayOrders(orders);
     } catch (error) {
         console.error('Error loading orders:', error);
-        container.innerHTML = '<p class="loading">Ошибка при загрузке заказов</p>';
+        container.innerHTML = '<p class="loading">Error loading orders</p>';
     }
 }
 
@@ -53,10 +53,10 @@ function displayOrders(orders) {
     const container = document.getElementById('adminOrdersList');
     
     const statusNames = {
-        'new': '🆕 Новый',
-        'in_progress': '🔧 В работе',
-        'completed': '✅ Выполнен',
-        'cancelled': '❌ Отменён'
+        'new': '🆕 New',
+        'in_progress': '🔧 In Progress',
+        'completed': '✅ Completed',
+        'cancelled': '❌ Cancelled'
     };
     
     const statusClasses = {
@@ -108,60 +108,60 @@ async function showOrderDetail(orderId) {
         const order = await response.json();
         
         if (!order) {
-            alert('❌ Заказ не найден');
+            alert('❌ Order not found');
             return;
         }
-        
+
         const statusNames = {
-            'new': '🆕 Новый',
-            'in_progress': '🔧 В работе',
-            'completed': '✅ Выполнен',
-            'cancelled': '❌ Отменён'
+            'new': '🆕 New',
+            'in_progress': '🔧 In Progress',
+            'completed': '✅ Completed',
+            'cancelled': '❌ Cancelled'
         };
         
         const modal = document.getElementById('orderModal');
         const detail = document.getElementById('orderDetail');
         
         detail.innerHTML = `
-            <h2>📦 Заказ ${order.id} | ${statusNames[order.status] || order.status}</h2>
-            <p style="color: #808080;">Создан: ${order.created_at}</p>
-            
+            <h2>📦 Order ${order.id} | ${statusNames[order.status] || order.status}</h2>
+            <p style="color: #808080;">Created: ${order.created_at}</p>
+
             <div style="margin: 20px 0; padding: 15px; background: linear-gradient(145deg, #2a3a3e, #1f2f2e); border-radius: 8px;">
-                <p><strong>👤 Пользователь:</strong> ${order.username} (ID: ${order.user_id})</p>
+                <p><strong>👤 User:</strong> ${order.username} (ID: ${order.user_id})</p>
             </div>
-            
+
             <div class="summary-box">
                 <div class="summary-item">
-                    <strong>🚗 Авто:</strong>
+                    <strong>🚗 Car:</strong>
                     <span>${order.car?.name || 'N/A'} (${order.car?.years || ''})</span>
                 </div>
                 <div class="summary-item">
-                    <strong>⚙️ Двигатель:</strong>
+                    <strong>⚙️ Engine:</strong>
                     <span>${order.engine?.name || 'N/A'} — ${order.engine?.power || ''}</span>
                 </div>
                 <div class="summary-item">
-                    <strong>🔧 Подвеска:</strong>
+                    <strong>🔧 Suspension:</strong>
                     <span>${order.suspension?.name || 'N/A'}</span>
                 </div>
                 <div class="summary-item">
-                    <strong>🎨 Обвес:</strong>
+                    <strong>🎨 Bodykit:</strong>
                     <span>${order.bodykit?.name || 'N/A'}</span>
                 </div>
                 <div class="summary-item">
-                    <strong>🛞 Диски:</strong>
+                    <strong>🛞 Wheels:</strong>
                     <span>${order.wheels?.name || 'N/A'}</span>
                 </div>
             </div>
-            
-            ${order.notes ? `<p style="margin-top: 20px;"><strong>📝 Заметки:</strong> ${order.notes}</p>` : ''}
-            
+
+            ${order.notes ? `<p style="margin-top: 20px;"><strong>📝 Notes:</strong> ${order.notes}</p>` : ''}
+
             <div style="margin-top: 30px;">
-                <h3 style="margin-bottom: 15px;">Изменить статус:</h3>
+                <h3 style="margin-bottom: 15px;">Change status:</h3>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    ${order.status !== 'new' ? `<button class="btn btn-small btn-secondary" onclick="updateOrderStatus('${order.id}', 'new')">🆕 Новый</button>` : ''}
-                    ${order.status !== 'in_progress' ? `<button class="btn btn-small btn-secondary" onclick="updateOrderStatus('${order.id}', 'in_progress')">🔧 В работе</button>` : ''}
-                    ${order.status !== 'completed' ? `<button class="btn btn-small btn-primary" onclick="updateOrderStatus('${order.id}', 'completed')">✅ Выполнен</button>` : ''}
-                    ${order.status !== 'cancelled' ? `<button class="btn btn-small" style="background: #f44336; color: white;" onclick="updateOrderStatus('${order.id}', 'cancelled')">❌ Отменён</button>` : ''}
+                    ${order.status !== 'new' ? `<button class="btn btn-small btn-secondary" onclick="updateOrderStatus('${order.id}', 'new')">🆕 New</button>` : ''}
+                    ${order.status !== 'in_progress' ? `<button class="btn btn-small btn-secondary" onclick="updateOrderStatus('${order.id}', 'in_progress')">🔧 In Progress</button>` : ''}
+                    ${order.status !== 'completed' ? `<button class="btn btn-small btn-primary" onclick="updateOrderStatus('${order.id}', 'completed')">✅ Completed</button>` : ''}
+                    ${order.status !== 'cancelled' ? `<button class="btn btn-small" style="background: #f44336; color: white;" onclick="updateOrderStatus('${order.id}', 'cancelled')">❌ Cancelled</button>` : ''}
                 </div>
             </div>
         `;
@@ -169,7 +169,7 @@ async function showOrderDetail(orderId) {
         modal.classList.add('show');
     } catch (error) {
         console.error('Error loading order detail:', error);
-        alert('❌ Ошибка при загрузке заказа');
+        alert('❌ Error loading order');
     }
 }
 
@@ -185,21 +185,21 @@ async function updateOrderStatus(orderId, newStatus) {
         
         if (response.ok) {
             const statusNames = {
-                'new': '🆕 Новый',
-                'in_progress': '🔧 В работе',
-                'completed': '✅ Выполнен',
-                'cancelled': '❌ Отменён'
+                'new': '🆕 New',
+                'in_progress': '🔧 In Progress',
+                'completed': '✅ Completed',
+                'cancelled': '❌ Cancelled'
             };
-            
-            alert(`✅ Статус ${orderId} → ${statusNames[newStatus]}`);
+
+            alert(`✅ Status ${orderId} → ${statusNames[newStatus]}`);
             closeModal();
             loadAdminOrders(currentFilter);
         } else {
-            alert('❌ Ошибка при обновлении статуса');
+            alert('❌ Error updating status');
         }
     } catch (error) {
         console.error('Error updating order status:', error);
-        alert('❌ Ошибка при обновлении статуса');
+        alert('❌ Error updating status');
     }
 }
 

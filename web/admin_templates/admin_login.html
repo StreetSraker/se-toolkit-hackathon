@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вход - Панель сервиса JDM</title>
+    <title>Login - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🔧 Панель сервиса</h1>
-            <p class="subtitle">Система управления заказами JDM Config</p>
+            <h1>🔧 Service Panel</h1>
+            <p class="subtitle">JDM Config Order Management System</p>
         </header>
 
         <!-- Login Form -->
         <div id="adminLogin" class="login-form">
-            <h2>🔐 Вход в панель сервиса</h2>
+            <h2>🔐 Service Panel Login</h2>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="password">Пароль:</label>
-                    <input type="password" id="password" class="input-field" placeholder="Введите пароль" required>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" class="input-field" placeholder="Enter password" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="submit" class="btn btn-primary">Login</button>
                 <p id="loginError" class="error-message hidden"></p>
             </form>
         </div>

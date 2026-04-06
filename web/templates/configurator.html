@@ -1,93 +1,93 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конфигуратор - JDM Config Web</title>
+    <title>Configurator - JDM Config Web</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <a href="/" class="back-link">← Назад</a>
-            <h1>🚗 Конфигуратор автомобиля</h1>
+            <a href="/" class="back-link">← Back</a>
+            <h1>🚗 Car Configurator</h1>
         </header>
 
         <!-- Progress Bar -->
         <div class="progress-bar">
             <div class="progress-step active" data-step="1">
                 <div class="step-number">1</div>
-                <div class="step-label">Авто</div>
+                <div class="step-label">Car</div>
             </div>
             <div class="progress-step" data-step="2">
                 <div class="step-number">2</div>
-                <div class="step-label">Двигатель</div>
+                <div class="step-label">Engine</div>
             </div>
             <div class="progress-step" data-step="3">
                 <div class="step-number">3</div>
-                <div class="step-label">Подвеска</div>
+                <div class="step-label">Suspension</div>
             </div>
             <div class="progress-step" data-step="4">
                 <div class="step-number">4</div>
-                <div class="step-label">Обвес</div>
+                <div class="step-label">Body Kit</div>
             </div>
             <div class="progress-step" data-step="5">
                 <div class="step-number">5</div>
-                <div class="step-label">Диски</div>
+                <div class="step-label">Wheels</div>
             </div>
             <div class="progress-step" data-step="6">
                 <div class="step-number">6</div>
-                <div class="step-label">Готово</div>
+                <div class="step-label">Done</div>
             </div>
         </div>
 
         <!-- Step 1: Car Selection -->
         <div class="config-step-content" id="step1">
-            <h2>Выберите автомобиль</h2>
+            <h2>Select a Car</h2>
             <div class="options-grid options-grid-cars" id="carOptions"></div>
         </div>
 
         <!-- Step 2: Engine Selection -->
         <div class="config-step-content hidden" id="step2">
-            <h2>Выберите двигатель</h2>
+            <h2>Select an Engine</h2>
             <div id="selectedCarInfo" class="info-box"></div>
             <div class="options-grid" id="engineOptions"></div>
         </div>
 
         <!-- Step 3: Suspension Selection -->
         <div class="config-step-content hidden" id="step3">
-            <h2>Выберите подвеску</h2>
+            <h2>Select Suspension</h2>
             <div id="selectedEngineInfo" class="info-box"></div>
             <div class="options-grid" id="suspensionOptions"></div>
         </div>
 
         <!-- Step 4: Bodykit Selection -->
         <div class="config-step-content hidden" id="step4">
-            <h2>Выберите обвес</h2>
+            <h2>Select Body Kit</h2>
             <div id="selectedSuspensionInfo" class="info-box"></div>
             <div class="options-grid" id="bodykitOptions"></div>
         </div>
 
         <!-- Step 5: Wheel Selection -->
         <div class="config-step-content hidden" id="step5">
-            <h2>Выберите диски</h2>
+            <h2>Select Wheels</h2>
             <div id="selectedBodykitInfo" class="info-box"></div>
             <div class="options-grid" id="wheelOptions"></div>
         </div>
 
         <!-- Step 6: Summary -->
         <div class="config-step-content hidden" id="step6">
-            <h2>✅ Конфигурация готова!</h2>
+            <h2>✅ Configuration Complete!</h2>
             <div id="configSummary" class="summary-box"></div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="submitOrder()">📦 Оформить заказ</button>
-                <button class="btn btn-secondary" onclick="restartConfig()">🔄 Начать заново</button>
+                <button class="btn btn-primary" onclick="submitOrder()">📦 Place Order</button>
+                <button class="btn btn-secondary" onclick="restartConfig()">🔄 Start Over</button>
             </div>
         </div>
 
         <!-- Navigation Buttons -->
         <div class="navigation-buttons" id="navButtons">
-            <button class="btn btn-secondary hidden" id="prevBtn" onclick="prevStep()">← Назад</button>
+            <button class="btn btn-secondary hidden" id="prevBtn" onclick="prevStep()">← Back</button>
         </div>
     </div>
 

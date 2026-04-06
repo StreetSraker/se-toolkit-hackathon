@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - JDM Car Configurator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .marketplace-header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .marketplace-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        .marketplace-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        .marketplace-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+        .marketplace-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .marketplace-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+        .marketplace-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .marketplace-card-content {
+            padding: 20px;
+        }
+        .marketplace-card h3 {
+            margin: 0 0 8px 0;
+            color: #1a1a2e;
+            font-size: 1.3em;
+        }
+        .marketplace-card .price {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #64748b;
+            margin: 12px 0;
+        }
+        .marketplace-card .description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+        .marketplace-card .mods-preview {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #495057;
+        }
+        .image-count {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #64748b;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        .no-cars {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .no-cars .icon {
+            font-size: 4em;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚗 Marketplace</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/configurator" class="nav-link">Configurator</a>
+                <a href="/marketplace" class="nav-link active">Marketplace</a>
+                <a href="/orders" class="nav-link">Orders</a>
+            </nav>
+        </header>
+
+        <div class="marketplace-header">
+            <h1>Ready-Made Projects</h1>
+            <p>Pre-modified JDM cars from our service</p>
+        </div>
+
+        <div id="marketplaceGrid" class="marketplace-grid">
+            <p class="loading">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadMarketplace() {
+            try {
+                const response = await fetch('/api/marketplace');
+                const cars = await response.json();
+                renderCars(cars);
+            } catch (error) {
+                console.error('Error loading marketplace:', error);
+                document.getElementById('marketplaceGrid').innerHTML = 
+                    '<p class="error">Loading error</p>';
+            }
+        }
+
+        function renderCars(cars) {
+            const grid = document.getElementById('marketplaceGrid');
+            
+            if (cars.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-cars">
+                        <div class="icon">🔍</div>
+                        <h2>No Cars Available Yet</h2>
+                        <p>Stay tuned for updates or order a custom project</p>
+                        <a href="/configurator" class="btn btn-primary" style="margin-top: 20px;">
+                            Build Your Own Project
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = cars.map(car => `
+                <div class="marketplace-card" onclick="window.location.href='/marketplace/${car.id}'">
+                    ${car.images && car.images.length > 0 
+                        ? `<img src="${car.images[0]}" alt="${car.name}">`
+                        : `<div style="width:100%;height:220px;background:linear-gradient(135deg,#64748b 0%,#475569 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:4em;">🚗</div>`
+                    }
+                    <div class="marketplace-card-content">
+                        <h3>${car.name}</h3>
+                        <div class="price">${car.price || 'By arrangement'}</div>
+                        <p class="description">${car.description ? car.description.substring(0, 120) + '...' : 'No description'}</p>
+                        ${car.questionnaire && car.questionnaire.mods_list
+                            ? `<div class="mods-preview">
+                                <strong>Modifications:</strong> ${car.questionnaire.mods_list.substring(0, 80)}...
+                               </div>`
+                            : ''
+                        }
+                        ${car.images && car.images.length > 0
+                            ? `<div class="image-count">📸 ${car.images.length} photo(s)</div>`
+                            : ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        loadMarketplace();
+    </script>
+</body>
+</html>

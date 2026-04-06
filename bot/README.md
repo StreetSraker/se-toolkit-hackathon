@@ -42,7 +42,7 @@ Telegram bot for configuring and ordering classic JDM cars from the 90s and 00s 
 
 Anyone can access the admin panel with a password:
 
-1. Click "🔧 Панель сервиса" in the main menu or use `/admin`
+1. Click "🔧 Service Panel" in the main menu or use `/admin`
 2. Enter the password (default: `service2024`)
 3. Change the password in `.env` file or `bot/handlers/admin.py`:
    ```python

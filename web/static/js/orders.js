@@ -14,9 +14,9 @@ async function loadOrders() {
         if (orders.length === 0) {
             container.innerHTML = `
                 <div class="info-box">
-                    <h3>📋 У вас пока нет заказов</h3>
-                    <p>Сначала настройте автомобиль через Конфигуратор.</p>
-                    <a href="/configurator" class="btn btn-primary" style="margin-top: 20px;">🚗 Конфигуратор</a>
+                    <h3>📋 You have no orders yet</h3>
+                    <p>First configure a car through the Configurator.</p>
+                    <a href="/configurator" class="btn btn-primary" style="margin-top: 20px;">🚗 Configurator</a>
                 </div>
             `;
             return;
@@ -25,7 +25,7 @@ async function loadOrders() {
         displayOrders(orders);
     } catch (error) {
         console.error('Error loading orders:', error);
-        container.innerHTML = '<p class="loading">Ошибка при загрузке заказов</p>';
+        container.innerHTML = '<p class="loading">Error loading orders</p>';
     }
 }
 
@@ -33,10 +33,10 @@ function displayOrders(orders) {
     const container = document.getElementById('ordersList');
     
     const statusNames = {
-        'new': '🆕 Новый',
-        'in_progress': '🔧 В работе',
-        'completed': '✅ Выполнен',
-        'cancelled': '❌ Отменён'
+        'new': '🆕 New',
+        'in_progress': '🔧 In Progress',
+        'completed': '✅ Completed',
+        'cancelled': '❌ Cancelled'
     };
     
     const statusClasses = {
@@ -62,13 +62,13 @@ function displayOrders(orders) {
                     <span class="order-status ${statusClass}">${statusName}</span>
                 </div>
                 <div class="order-details">
-                    <div><strong>⚙️ Двигатель:</strong> ${order.engine?.name || 'N/A'}</div>
-                    <div><strong>🔧 Подвеска:</strong> ${order.suspension?.name || 'N/A'}</div>
-                    <div><strong>🎨 Обвес:</strong> ${order.bodykit?.name || 'N/A'}</div>
-                    <div><strong>🛞 Диски:</strong> ${order.wheels?.name || 'N/A'}</div>
+                    <div><strong>⚙️ Engine:</strong> ${order.engine?.name || 'N/A'}</div>
+                    <div><strong>🔧 Suspension:</strong> ${order.suspension?.name || 'N/A'}</div>
+                    <div><strong>🎨 Bodykit:</strong> ${order.bodykit?.name || 'N/A'}</div>
+                    <div><strong>🛞 Wheels:</strong> ${order.wheels?.name || 'N/A'}</div>
                 </div>
                 <div class="order-date">
-                    Создан: ${order.created_at}
+                    Created: ${order.created_at}
                 </div>
             </div>
         `;

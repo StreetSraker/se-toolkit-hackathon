@@ -130,6 +130,49 @@ Submit a presentation with five slides:
 
 ----
 
+## Quick Deployment
+
+### Docker Deployment (Recommended)
+
+The easiest way to deploy all services:
+
+```bash
+# 1. Configure your bot token
+cp .env.example .env
+nano .env  # Add your BOT_TOKEN from @BotFather
+
+# 2. Deploy everything
+./deploy.sh
+
+# 3. Check status
+docker compose ps
+```
+
+**Access your services:**
+- 🚗 **Client Website:** http://YOUR_SERVER_IP:5000
+- 🔧 **Admin Panel:** http://YOUR_SERVER_IP:5001 (Password: service2024)
+- 🤖 **Telegram Bot:** Search for your bot username on Telegram
+
+### Manual Deployment (Without Docker)
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+nano .env  # Edit settings
+
+# Start services (in separate terminals)
+python -m bot.main               # Telegram Bot
+python web/client_app.py         # Client Website (Port 5000)
+python web/admin_app.py          # Admin Website (Port 5001)
+```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)
+
+----
+
 ## Publishing the product code on GitHub
 
 - Publish the product code in a repository on `GitHub`.

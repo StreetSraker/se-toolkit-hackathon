@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Car - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .form-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: #1a1a2e;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .image-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .image-upload-area:hover {
+            border-color: #64748b;
+        }
+        .image-upload-area.dragover {
+            border-color: #64748b;
+            background: #f0f4ff;
+        }
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .questionnaire-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚗 {{ 'Edit' if car else 'Add' }} Car for Sale</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/for-sale" class="nav-link active">Car Sales</a>
+                <a href="/stats" class="nav-link">Statistics</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
+            </nav>
+        </header>
+
+        <div class="form-container">
+            <form id="carForm" onsubmit="saveCar(event)">
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3>📋 Basic Information</h3>
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="e.g. Toyota Supra A80 - Drift Spec">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="base_car_id">Base Car</label>
+                            <select id="base_car_id" name="base_car_id">
+                                <option value="">Select...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price</label>
+                            <input type="text" id="price" name="price" placeholder="e.g. $25,000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" placeholder="Detailed car description, features..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="is_available" name="is_available" checked>
+                            For Sale
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Questionnaire -->
+                <div class="form-section">
+                    <h3>📝 Questionnaire</h3>
+                    <div class="questionnaire-grid">
+                        <div class="form-group">
+                            <label for="q_mileage">Mileage (km)</label>
+                            <input type="text" id="q_mileage" placeholder="e.g. 45,000">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_year">Year</label>
+                            <input type="text" id="q_year" placeholder="e.g. 1998">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_condition">Condition</label>
+                            <select id="q_condition">
+                                <option value="">Select...</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="project">Project</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="q_documents">Documents</label>
+                            <input type="text" id="q_documents" placeholder="Title, registration, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_location">Location</label>
+                            <input type="text" id="q_location" placeholder="City/region">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_contact">Contact</label>
+                            <input type="text" id="q_contact" placeholder="Telegram, phone...">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="q_mods_list">Modifications List</label>
+                        <textarea id="q_mods_list" placeholder="List all installed parts and modifications..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Modifications -->
+                <div class="form-section">
+                    <h3>🔧 Modifications</h3>
+                    <div class="form-group">
+                        <label for="engine">Engine</label>
+                        <select id="engine" name="engine" onchange="toggleCustomInput('engine', this.value)">
+                            <option value="">Select...</option>
+                        </select>
+                        <input type="text" id="engine_custom" class="custom-input" style="display:none; margin-top:8px;" placeholder="Specify your own engine option...">
+                    </div>
+                    <div class="form-group">
+                        <label for="suspension">Suspension</label>
+                        <select id="suspension" name="suspension" onchange="toggleCustomInput('suspension', this.value)">
+                            <option value="">Select...</option>
+                        </select>
+                        <input type="text" id="suspension_custom" class="custom-input" style="display:none; margin-top:8px;" placeholder="Specify your own suspension option...">
+                    </div>
+                    <div class="form-group">
+                        <label for="bodykit">Body Kit</label>
+                        <select id="bodykit" name="bodykit" onchange="toggleCustomInput('bodykit', this.value)">
+                            <option value="">Select...</option>
+                        </select>
+                        <input type="text" id="bodykit_custom" class="custom-input" style="display:none; margin-top:8px;" placeholder="Specify your own body kit option...">
+                    </div>
+                    <div class="form-group">
+                        <label for="wheels">Wheels</label>
+                        <select id="wheels" name="wheels" onchange="toggleCustomInput('wheels', this.value)">
+                            <option value="">Select...</option>
+                        </select>
+                        <input type="text" id="wheels_custom" class="custom-input" style="display:none; margin-top:8px;" placeholder="Specify your own wheel option...">
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <div class="form-section">
+                    <h3>📸 Photos</h3>
+                    <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <p style="font-size: 2em; margin: 0;">📷</p>
+                        <p>Click or drag photos here</p>
+                        <p style="font-size: 0.85em; color: #666;">JPG, PNG, WebP (max 10 photos)</p>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="image-preview-grid" id="imagePreviewGrid"></div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <a href="/for-sale" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let carId = {{ car | tojson if car else 'null' }};
+        let currentImages = [];
+        let pendingFiles = [];
+
+        // Load base cars
+        async function loadBaseCars() {
+            const response = await fetch('/api/config/cars');
+            const cars = await response.json();
+            const select = document.getElementById('base_car_id');
+            cars.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.id;
+                option.textContent = car.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Load suspensions
+        async function loadSuspensions() {
+            const response = await fetch('/api/config/suspensions');
+            const suspensions = await response.json();
+            const select = document.getElementById('suspension');
+            suspensions.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Load bodykits
+        async function loadBodykits() {
+            const response = await fetch('/api/config/bodykits');
+            const bodykits = await response.json();
+            const select = document.getElementById('bodykit');
+            bodykits.forEach(b => {
+                const option = document.createElement('option');
+                option.value = b.id;
+                option.textContent = b.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Load wheels
+        async function loadWheels() {
+            const response = await fetch('/api/config/wheels');
+            const wheels = await response.json();
+            const select = document.getElementById('wheels');
+            wheels.forEach(w => {
+                const option = document.createElement('option');
+                option.value = w.id;
+                option.textContent = w.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Load engines based on selected car
+        async function loadEngines(carId) {
+            if (!carId) return;
+            const response = await fetch(`/api/config/engines/${carId}`);
+            const engines = await response.json();
+            const select = document.getElementById('engine');
+            select.innerHTML = '<option value="">Select...</option>';
+            engines.forEach(e => {
+                const option = document.createElement('option');
+                option.value = e.id;
+                option.textContent = e.name;
+                select.appendChild(option);
+            });
+        }
+
+        document.getElementById('base_car_id').addEventListener('change', (e) => {
+            loadEngines(e.target.value);
+        });
+
+        // Toggle custom input visibility
+        function toggleCustomInput(field, value) {
+            const customInput = document.getElementById(`${field}_custom`);
+            if (value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+                customInput.value = '';
+            }
+        }
+
+        // Build mod value with optional custom_value
+        function buildModValue(field) {
+            const select = document.getElementById(field);
+            const customInput = document.getElementById(`${field}_custom`);
+            const result = { id: select.value };
+            if (select.value === 'custom' && customInput.value.trim()) {
+                result.custom_value = customInput.value.trim();
+                result.name = customInput.value.trim();
+            }
+            return result;
+        }
+
+        // Load existing car data
+        async function loadCar() {
+            if (!carId) return;
+            const response = await fetch(`/api/for-sale/${carId}`);
+            const car = await response.json();
+            
+            document.getElementById('name').value = car.name || '';
+            document.getElementById('base_car_id').value = car.base_car_id || '';
+            document.getElementById('price').value = car.price || '';
+            document.getElementById('description').value = car.description || '';
+            document.getElementById('is_available').checked = car.is_available !== false;
+            
+            // Load engines for selected car
+            if (car.base_car_id) {
+                await loadEngines(car.base_car_id);
+            }
+            
+            // Set modifications
+            if (car.engine && car.engine.id) {
+                setTimeout(() => {
+                    document.getElementById('engine').value = car.engine.id;
+                    if (car.engine.id === 'custom' && car.engine.custom_value) {
+                        document.getElementById('engine_custom').value = car.engine.custom_value;
+                        document.getElementById('engine_custom').style.display = 'block';
+                    }
+                }, 500);
+            }
+            if (car.suspension && car.suspension.id) {
+                document.getElementById('suspension').value = car.suspension.id;
+                if (car.suspension.id === 'custom' && car.suspension.custom_value) {
+                    document.getElementById('suspension_custom').value = car.suspension.custom_value;
+                    document.getElementById('suspension_custom').style.display = 'block';
+                }
+            }
+            if (car.bodykit && car.bodykit.id) {
+                document.getElementById('bodykit').value = car.bodykit.id;
+                if (car.bodykit.id === 'custom' && car.bodykit.custom_value) {
+                    document.getElementById('bodykit_custom').value = car.bodykit.custom_value;
+                    document.getElementById('bodykit_custom').style.display = 'block';
+                }
+            }
+            if (car.wheels && car.wheels.id) {
+                document.getElementById('wheels').value = car.wheels.id;
+                if (car.wheels.id === 'custom' && car.wheels.custom_value) {
+                    document.getElementById('wheels_custom').value = car.wheels.custom_value;
+                    document.getElementById('wheels_custom').style.display = 'block';
+                }
+            }
+            
+            // Set questionnaire
+            const q = car.questionnaire || {};
+            document.getElementById('q_mileage').value = q.mileage || '';
+            document.getElementById('q_year').value = q.year || '';
+            document.getElementById('q_condition').value = q.condition || '';
+            document.getElementById('q_documents').value = q.documents || '';
+            document.getElementById('q_location').value = q.location || '';
+            document.getElementById('q_contact').value = q.contact || '';
+            document.getElementById('q_mods_list').value = q.mods_list || '';
+            
+            // Set existing images
+            currentImages = car.images || [];
+            renderImagePreviews();
+        }
+
+        // Image handling
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            addPendingFiles(files);
+        });
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            addPendingFiles(files);
+            event.target.value = '';
+        }
+
+        function addPendingFiles(files) {
+            const remaining = 10 - currentImages.length - pendingFiles.length;
+            const toAdd = files.slice(0, remaining);
+            pendingFiles = [...pendingFiles, ...toAdd];
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            const grid = document.getElementById('imagePreviewGrid');
+            let html = '';
+            
+            // Existing images
+            currentImages.forEach((img, idx) => {
+                html += `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="">
+                        <button type="button" class="remove-btn" onclick="removeExistingImage(${idx})">×</button>
+                    </div>
+                `;
+            });
+            
+            // Pending uploads
+            pendingFiles.forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const tempId = `pending-${idx}`;
+                    const el = document.getElementById(tempId);
+                    if (el) el.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                html += `
+                    <div class="image-preview-item">
+                        <img id="pending-${idx}" src="" alt="">
+                        <button type="button" class="remove-btn" onclick="removePendingImage(${idx})">×</button>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function removeExistingImage(idx) {
+            currentImages.splice(idx, 1);
+            renderImagePreviews();
+        }
+
+        function removePendingImage(idx) {
+            pendingFiles.splice(idx, 1);
+            renderImagePreviews();
+        }
+
+        // Save car
+        async function saveCar(event) {
+            event.preventDefault();
+            
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            const carData = {
+                name: document.getElementById('name').value,
+                base_car_id: document.getElementById('base_car_id').value,
+                price: document.getElementById('price').value,
+                description: document.getElementById('description').value,
+                is_available: document.getElementById('is_available').checked,
+                questionnaire: {
+                    mileage: document.getElementById('q_mileage').value,
+                    year: document.getElementById('q_year').value,
+                    condition: document.getElementById('q_condition').value,
+                    documents: document.getElementById('q_documents').value,
+                    location: document.getElementById('q_location').value,
+                    contact: document.getElementById('q_contact').value,
+                    mods_list: document.getElementById('q_mods_list').value,
+                },
+                engine: buildModValue('engine'),
+                suspension: buildModValue('suspension'),
+                bodykit: buildModValue('bodykit'),
+                wheels: buildModValue('wheels'),
+                images: currentImages,
+            };
+            
+            try {
+                let response;
+                if (carId) {
+                    response = await fetch(`/api/for-sale/${carId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(carData)
+                    });
+                } else {
+                    response = await fetch('/api/for-sale', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(carData)
+                    });
+                }
+                
+                if (!response.ok) {
+                    alert('Save error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save';
+                    return;
+                }
+                
+                const savedCar = await response.json();
+                carId = savedCar.id;
+                
+                // Upload pending images
+                if (pendingFiles.length > 0) {
+                    const formData = new FormData();
+                    pendingFiles.forEach(file => {
+                        formData.append('images', file);
+                    });
+                    
+                    const imgResponse = await fetch(`/api/for-sale/${carId}/images`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (imgResponse.ok) {
+                        const imgData = await imgResponse.json();
+                        currentImages = [...currentImages, ...imgData.images];
+                    }
+                }
+                
+                alert('Saved!');
+                window.location.href = '/for-sale';
+            } catch (error) {
+                alert('Error: ' + error.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        }
+
+        // Initialize
+        loadBaseCars();
+        loadSuspensions();
+        loadBodykits();
+        loadWheels();
+        loadCar();
+    </script>
+</body>
+</html>

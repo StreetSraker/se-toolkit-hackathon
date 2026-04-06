@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дашборд - Панель сервиса JDM</title>
+    <title>Dashboard - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🔧 Панель сервиса</h1>
+            <h1>🔧 Service Panel</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link active">Дашборд</a>
-                <a href="/orders" class="nav-link">Заказы</a>
-                <a href="/stats" class="nav-link">Статистика</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+                <a href="/dashboard" class="nav-link active">Dashboard</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/for-sale" class="nav-link">Car Sales</a>
+                <a href="/stats" class="nav-link">Statistics</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
             </nav>
         </header>
 
@@ -22,30 +23,30 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="statTotal">0</div>
-                <div class="stat-label">Всего заказов</div>
+                <div class="stat-label">Total orders</div>
             </div>
             <div class="stat-card stat-new">
                 <div class="stat-number" id="statNew">0</div>
-                <div class="stat-label">🆕 Новые</div>
+                <div class="stat-label">🆕 New</div>
             </div>
             <div class="stat-card stat-progress">
                 <div class="stat-number" id="statProgress">0</div>
-                <div class="stat-label">🔧 В работе</div>
+                <div class="stat-label">🔧 In Progress</div>
             </div>
             <div class="stat-card stat-completed">
                 <div class="stat-number" id="statCompleted">0</div>
-                <div class="stat-label">✅ Выполнены</div>
+                <div class="stat-label">✅ Completed</div>
             </div>
             <div class="stat-card stat-cancelled">
                 <div class="stat-number" id="statCancelled">0</div>
-                <div class="stat-label">❌ Отменены</div>
+                <div class="stat-label">❌ Cancelled</div>
             </div>
         </div>
 
         <!-- Recent Orders -->
-        <h2 style="margin: 30px 0 20px; color: #ff6b6b;">📋 Последние заказы</h2>
+        <h2 style="margin: 30px 0 20px; color: #64748b;">📋 Recent Orders</h2>
         <div id="recentOrders" class="orders-list">
-            <p class="loading">Загрузка...</p>
+            <p class="loading">Loading...</p>
         </div>
     </div>
 

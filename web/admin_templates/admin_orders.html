@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заказы - Панель сервиса JDM</title>
+    <title>Orders - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>📋 Управление заказами</h1>
+            <h1>📋 Order Management</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link">Дашборд</a>
-                <a href="/orders" class="nav-link active">Заказы</a>
-                <a href="/stats" class="nav-link">Статистика</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/orders" class="nav-link active">Orders</a>
+                <a href="/for-sale" class="nav-link">Car Sales</a>
+                <a href="/stats" class="nav-link">Statistics</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
             </nav>
         </header>
 
         <!-- Filter Buttons -->
         <div class="filter-buttons">
-            <button class="btn btn-filter active" onclick="filterOrders('all')">Все заказы</button>
-            <button class="btn btn-filter" onclick="filterOrders('new')">🆕 Новые</button>
-            <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 В работе</button>
-            <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Выполнены</button>
-            <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Отменены</button>
+            <button class="btn btn-filter active" onclick="filterOrders('all')">All Orders</button>
+            <button class="btn btn-filter" onclick="filterOrders('new')">🆕 New</button>
+            <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 In Progress</button>
+            <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Completed</button>
+            <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Cancelled</button>
         </div>
 
         <!-- Orders List -->
         <div id="adminOrdersList" class="admin-orders-list">
-            <p class="loading">Загрузка заказов...</p>
+            <p class="loading">Loading orders...</p>
         </div>
     </div>
 
