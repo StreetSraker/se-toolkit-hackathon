@@ -12,9 +12,6 @@ A Telegram bot and web platform for ordering and configuring classic 90s/00s JDM
 ### Client Website - Marketplace
 ![Marketplace](Images/demo/marketplace_demo.png)
 
-### Admin Panel - Order Management
-![Admin Panel](Images/demo/admin_demo.png)
-
 ### Telegram Bot
 ![Telegram Bot](Images/demo/bot_demo.png)
 
@@ -45,7 +42,7 @@ Service centers lack a centralized system to:
 A multi-platform system with:
 - **Telegram Bot** — Quick access to order tracking and notifications
 - **Client Website** — Interactive car configurator with step-by-step customization
-- **Admin Panel** — Service center dashboard for order management and analytics
+- **Service Website** — Service center dashboard for order management and analytics
 
 ---
 
@@ -71,7 +68,7 @@ A multi-platform system with:
 - Mobile responsive design
 - Internationalization (English & Russian)
 
-#### Admin Panel (Port 5001)
+#### Service Panel (Port 5001)
 - Service center registration and authentication
 - Order management (view, claim, release, update status)
 - Per-service data isolation
@@ -93,19 +90,6 @@ A multi-platform system with:
 - Deployment scripts
 - Health checks for all services
 
-### Not Yet Implemented 🚧
-
-- Real-time order status notifications (push to Telegram)
-- Payment processing integration
-- Image upload for custom builds
-- Advanced search and filtering in marketplace
-- Order comments/messaging between client and service
-- Email notifications
-- Multi-language support in Telegram bot
-- Admin role-based access control
-- Export orders to PDF
-- Car image gallery for configurator (SVG placeholders used)
-
 ---
 
 ## Usage
@@ -113,7 +97,7 @@ A multi-platform system with:
 ### For Car Enthusiasts
 
 1. **Via Website:**
-   - Open `http://YOUR_SERVER_IP:5000`
+   - Open `http://10.93.25.206:5000`
    - Register an account
    - Browse available JDM cars
    - Use the configurator to customize your build
@@ -127,19 +111,12 @@ A multi-platform system with:
 
 ### For Service Centers
 
-1. Open `http://YOUR_SERVER_IP:5001`
+1. Open `http://10.93.25.206:5001`
 2. Register as a service center
 3. Browse available orders
 4. Claim orders you want to fulfill
 5. Update order status as work progresses
 6. View statistics on your dashboard
-
-### For Marketplace Sellers
-
-1. Log in to the Admin Panel
-2. Navigate to "For Sale" section
-3. Add pre-modified cars with details and images
-4. Manage listings (edit, remove)
 
 ---
 
@@ -152,146 +129,6 @@ A multi-platform system with:
 - **Docker Compose** (version 2.0 or higher)
 - **Git**
 - **Telegram account** (to create a bot via @BotFather)
-
-### Step-by-Step Instructions
-
-#### 1. Install Docker
-
-```bash
-# Update package index
-sudo apt update
-
-# Install prerequisites
-sudo apt install -y ca-certificates curl gnupg
-
-# Add Docker's official GPG key
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-# Add Docker repository
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# Install Docker
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Add your user to docker group
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-#### 2. Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/se-toolkit-hackathon.git
-cd se-toolkit-hackathon
-```
-
-#### 3. Configure Environment Variables
-
-```bash
-cp .env.example .env
-nano .env
-```
-
-Edit the `.env` file:
-
-```bash
-# Get this from @BotFather on Telegram
-BOT_TOKEN=your_actual_bot_token_here
-
-# Change for production!
-ADMIN_PASSWORD=service2024
-
-# Use strong random strings in production
-SECRET_KEY=jdm-config-secret-key-2024
-ADMIN_SECRET_KEY=jdm-admin-secret-key-2024
-
-# Set to False in production
-FLASK_DEBUG=False
-
-PORT=5000
-ADMIN_PORT=5001
-```
-
-#### 4. Create Telegram Bot
-
-1. Open Telegram and search for **@BotFather**
-2. Send `/newbot`
-3. Choose a name (e.g., "JDM Configurator")
-4. Choose a username (must end in `bot`, e.g., `jdm_config_bot`)
-5. Copy the token and paste it into `.env`
-
-#### 5. Deploy
-
-```bash
-# Build and start all services
-./deploy.sh
-
-# Or manually
-docker compose up -d --build
-```
-
-#### 6. Verify Deployment
-
-```bash
-# Check all containers are running
-docker compose ps
-
-# View logs
-docker compose logs -f
-```
-
-#### 7. Access Services
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| Client Website | `http://YOUR_IP:5000` | Car configurator for customers |
-| Admin Panel | `http://YOUR_IP:5001` | Order management (Password: `service2024`) |
-| Telegram Bot | Search on Telegram | Bot interface |
-
-Get your server IP:
-```bash
-curl ifconfig.me
-```
-
-#### 8. Configure Firewall (if needed)
-
-```bash
-sudo ufw allow 5000/tcp
-sudo ufw allow 5001/tcp
-```
-
-### Managing Services
-
-```bash
-# Stop all services
-docker compose down
-
-# Restart all services
-docker compose restart
-
-# Restart specific service
-docker compose restart bot
-
-# View logs
-docker compose logs -f bot
-./logs.sh all
-
-# Update and rebuild
-git pull
-docker compose up -d --build
-
-# Complete reset (removes data)
-docker compose down -v
-docker compose up -d --build
-```
-
----
 
 ## Architecture
 
@@ -321,7 +158,7 @@ docker compose up -d --build
 
 1. **jdm-bot** — Telegram bot (polling-based, no exposed port)
 2. **jdm-client** — Client website (Port 5000)
-3. **jdm-admin** — Admin panel (Port 5001)
+3. **jdm-admin** — Service panel (Port 5001)
 
 ### Data Storage
 
