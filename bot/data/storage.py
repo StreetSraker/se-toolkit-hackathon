@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'db')
 ORDERS_FILE = os.path.join(DATA_DIR, 'orders.json')
 
 
@@ -36,18 +36,20 @@ def _save_orders(orders):
 def save_order(order_data):
     """
     Save a new order and return the order.
-    
+
     Args:
-        order_data: dict with keys: user_id, username, car, engine, suspension, bodykit, wheels, notes
-    
+        order_data: dict with keys: user_id, username, car, engine, suspension, bodykit, wheels, notes, contacts
+
     Returns:
         dict: The saved order with added id, timestamp, and status
     """
     orders = _load_orders()
-    
+
     # Generate order ID
     order_num = len(orders) + 1
     order_id = f"ORD-{order_num:04d}"
+
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     order = {
         'id': order_id,
@@ -59,9 +61,15 @@ def save_order(order_data):
         'bodykit': order_data.get('bodykit', {}),
         'wheels': order_data.get('wheels', {}),
         'notes': order_data.get('notes', ''),
+        'contacts': order_data.get('contacts', ''),
         'status': 'new',  # new, in_progress, completed, cancelled
-        'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'claimed_by': None,  # service ID that claimed this order
+        'claimed_at': None,
+        'status_history': [
+            {'status': 'new', 'by': 'system', 'by_name': 'System', 'at': now}
+        ],
+        'created_at': now,
+        'updated_at': now,
     }
     
     orders.append(order)
@@ -101,27 +109,111 @@ def get_order(order_id):
     return next((o for o in orders if o['id'] == order_id), None)
 
 
-def update_order_status(order_id, new_status):
+def update_order_status(order_id, new_status, service_id=None, service_name=None):
     """
     Update order status.
-    
+
     Args:
         order_id: Order ID string
         new_status: New status ('new', 'in_progress', 'completed', 'cancelled')
-    
+        service_id: Optional service ID making the change
+        service_name: Optional service name for display
+
     Returns:
         dict or None: Updated order or None if not found
     """
     orders = _load_orders()
     order = next((o for o in orders if o['id'] == order_id), None)
+
+    if not order:
+        return None
+
+    order['status'] = new_status
+    order['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
+    # Add to status history
+    if 'status_history' not in order:
+        order['status_history'] = []
+    
+    order['status_history'].append({
+        'status': new_status,
+        'by': service_id or 'system',
+        'by_name': service_name or 'System',
+        'at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    
+    _save_orders(orders)
+
+    return order
+
+
+def claim_order(order_id, service_id, service_name):
+    """
+    Claim an order for a service.
+
+    Args:
+        order_id: Order ID string
+        service_id: Service ID claiming the order
+        service_name: Service name for display
+
+    Returns:
+        dict or None: Updated order or None if not found/already claimed
+    """
+    orders = _load_orders()
+    order = next((o for o in orders if o['id'] == order_id), None)
+
     if not order:
         return None
     
-    order['status'] = new_status
+    if order.get('claimed_by'):
+        return None  # Already claimed
+
+    order['claimed_by'] = service_id
+    order['claimed_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     order['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    _save_orders(orders)
     
+    # Add to status history
+    if 'status_history' not in order:
+        order['status_history'] = []
+    
+    order['status_history'].append({
+        'status': 'claimed',
+        'by': service_id,
+        'by_name': service_name,
+        'at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    
+    _save_orders(orders)
+
+    return order
+
+
+def release_order(order_id, service_id):
+    """
+    Release a claimed order.
+
+    Args:
+        order_id: Order ID string
+        service_id: Service ID releasing the order (must be the one who claimed it)
+
+    Returns:
+        dict or None: Updated order or None if not found/not authorized
+    """
+    orders = _load_orders()
+    order = next((o for o in orders if o['id'] == order_id), None)
+
+    if not order:
+        return None
+    
+    if order.get('claimed_by') != service_id:
+        return None  # Not authorized to release
+
+    order['claimed_by'] = None
+    order['claimed_at'] = None
+    order['updated_at'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    _save_orders(orders)
+
     return order
 
 

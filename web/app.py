@@ -111,10 +111,10 @@ def api_get_orders():
 def api_create_order():
     """Create a new order"""
     data = request.json
-    
+
     if not data or not all(key in data for key in ['car', 'engine', 'suspension', 'bodykit', 'wheels']):
         return jsonify({'error': 'Missing required fields'}), 400
-    
+
     order_data = {
         'user_id': session.get('user_id', 'web-user'),
         'username': session.get('username', 'Web User'),
@@ -124,8 +124,9 @@ def api_create_order():
         'bodykit': data.get('bodykit'),
         'wheels': data.get('wheels'),
         'notes': data.get('notes', ''),
+        'contacts': data.get('contacts', ''),
     }
-    
+
     saved = save_order(order_data)
     return jsonify(saved), 201
 

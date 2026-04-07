@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏎️ JDM Config Web</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/configurator" class="nav-link">Configurator</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/marketplace" class="nav-link">Marketplace</a>
+                <a href="/profile" class="nav-link active">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
+            </nav>
+        </header>
+
+        <div class="login-form" style="max-width: 500px;">
+            <h2>👤 My Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" class="input-field" placeholder="Your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <span class="label-icon">🔒</span>
+                        New Password
+                    </label>
+                    <input type="password" id="password" class="input-field" placeholder="Leave blank to keep current">
+                    <small style="color: #888; display: block; margin-top: 4px;">Minimum 4 characters. Leave blank to keep current password.</small>
+                </div>
+                <div class="form-group">
+                    <label for="telegram">
+                        <span class="label-icon">💬</span>
+                        Telegram Username
+                    </label>
+                    <input type="text" id="telegram" class="input-field" placeholder="@your_username">
+                </div>
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon">📱</span>
+                        Phone Number
+                    </label>
+                    <input type="tel" id="phone" class="input-field" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="email">
+                        <span class="label-icon">📧</span>
+                        Email Address
+                    </label>
+                    <input type="email" id="email" class="input-field" placeholder="your@email.com">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button>
+                <div id="profileSuccess" class="success-message" style="display: none;"></div>
+                <div id="profileError" class="error-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .success-message {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProfile();
+        });
+
+        async function loadProfile() {
+            try {
+                // First check auth
+                const authResp = await fetch('/api/auth/check');
+                const authData = await authResp.json();
+                if (!authData.is_authenticated) {
+                    document.getElementById('profileError').textContent = '❌ You need to login first. <a href="/login">Go to login</a>';
+                    document.getElementById('profileError').style.display = 'block';
+                    return;
+                }
+
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('username').value = currentUser.username || '';
+                    document.getElementById('telegram').value = currentUser.telegram || '';
+                    document.getElementById('phone').value = currentUser.phone || '';
+                    document.getElementById('email').value = currentUser.email || '';
+                } else {
+                    const err = await response.json();
+                    document.getElementById('profileError').textContent = '❌ ' + (err.error || 'Failed to load profile');
+                    document.getElementById('profileError').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profileError').textContent = '❌ Connection error. Please try again.';
+                document.getElementById('profileError').style.display = 'block';
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const telegram = document.getElementById('telegram').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            const errorEl = document.getElementById('profileError');
+            const successEl = document.getElementById('profileSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            const updateData = {
+                username,
+                telegram,
+                phone,
+                email
+            };
+
+            if (password) {
+                if (password.length < 4) {
+                    errorEl.textContent = '❌ Password must be at least 4 characters';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                updateData.password = password;
+            }
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successEl.textContent = '✅ Profile updated successfully!';
+                    successEl.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    // Reload profile to get updated data
+                    await loadProfile();
+                } else {
+                    errorEl.textContent = '❌ ' + (data.error || 'Failed to update profile');
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = '❌ Connection error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        });
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+</html>

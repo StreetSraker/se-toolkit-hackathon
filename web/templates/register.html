@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏎️ JDM Config Web</h1>
+            <p class="subtitle">Create a new account</p>
+        </header>
+
+        <div class="login-form" style="max-width: 500px;">
+            <h2>📝 Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" class="input-field" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" class="input-field" placeholder="Choose a password (min 4 chars)" required>
+                </div>
+                <div class="form-group">
+                    <label for="telegram">
+                        <span class="label-icon">💬</span>
+                        Telegram Username
+                    </label>
+                    <input type="text" id="telegram" class="input-field" placeholder="@your_username">
+                </div>
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon">📱</span>
+                        Phone Number
+                    </label>
+                    <input type="tel" id="phone" class="input-field" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="email">
+                        <span class="label-icon">📧</span>
+                        Email Address
+                    </label>
+                    <input type="email" id="email" class="input-field" placeholder="your@email.com">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Register</button>
+                <div id="registerError" class="error-message" style="display: none;"></div>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: #b8c0cc;">
+                Already have an account? <a href="/login" style="color: #58a6ff;">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const telegram = document.getElementById('telegram').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const errorEl = document.getElementById('registerError');
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, telegram, phone, email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.message || 'Registration failed';
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = 'Connection error';
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

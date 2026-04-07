@@ -15,9 +15,17 @@
                 <a href="/orders" class="nav-link active">Orders</a>
                 <a href="/for-sale" class="nav-link">Car Sales</a>
                 <a href="/stats" class="nav-link">Statistics</a>
+                <a href="/services" class="nav-link">Services</a>
+                <a href="/profile" class="nav-link">Profile</a>
                 <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
             </nav>
         </header>
+
+        <!-- Service Info Banner -->
+        <div id="serviceInfo" class="service-info-banner" style="display: none;">
+            <span class="service-info-icon">🔧</span>
+            <span class="service-info-text">Logged in as: <strong id="serviceName"></strong></span>
+        </div>
 
         <!-- Filter Buttons -->
         <div class="filter-buttons">
@@ -26,6 +34,7 @@
             <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 In Progress</button>
             <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Completed</button>
             <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Cancelled</button>
+            <button class="btn btn-filter" id="myOrdersBtn" onclick="filterOrders('my')" style="display: none;">📦 My Orders</button>
         </div>
 
         <!-- Orders List -->

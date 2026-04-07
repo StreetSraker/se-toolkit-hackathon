@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .register-form {
+            max-width: 500px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .register-form h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .register-form .form-group {
+            margin-bottom: 16px;
+        }
+        .register-form .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+        }
+        .register-form .form-group input,
+        .register-form .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .register-form .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .register-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .register-form button[type="submit"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .register-form .login-link {
+            text-align: center;
+            margin-top: 16px;
+            color: #666;
+        }
+        .register-form .login-link a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-form .login-link a:hover {
+            text-decoration: underline;
+        }
+        .input-hint {
+            display: block;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 4px;
+        }
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 6px;
+            background: #eee;
+            overflow: hidden;
+        }
+        .password-strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 2px;
+            transition: width 0.3s, background 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔧 Service Panel</h1>
+            <p class="subtitle">JDM Config Order Management System</p>
+        </header>
+
+        <!-- Registration Form -->
+        <div class="register-form">
+            <h2>📝 Register New Service</h2>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="regName">Service Name *</label>
+                    <input type="text" id="regName" placeholder="e.g., Mike's Garage" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regUsername">Username *</label>
+                        <input type="text" id="regUsername" placeholder="e.g., mikemag" required pattern="[a-zA-Z0-9_]{3,20}">
+                        <span class="input-hint">3-20 chars, letters, numbers, underscores</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="regPassword">Password *</label>
+                        <input type="password" id="regPassword" placeholder="Min 4 characters" required minlength="4" oninput="updatePasswordStrength()">
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="regTelegram">Telegram Username</label>
+                        <input type="text" id="regTelegram" placeholder="@username">
+                    </div>
+                    <div class="form-group">
+                        <label for="regPhone">Phone Number</label>
+                        <input type="tel" id="regPhone" placeholder="+1234567890">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="regSpecialties">Specialties (comma-separated)</label>
+                    <input type="text" id="regSpecialties" placeholder="engine, suspension, bodykit">
+                </div>
+                <button type="submit" class="btn btn-primary">Register Service</button>
+                <p id="registerError" class="error-message hidden"></p>
+                <p id="registerSuccess" class="success-message hidden"></p>
+            </form>
+            <p class="login-link">
+                Already have an account? <a href="/">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <style>
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .success-message {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <script>
+        function updatePasswordStrength() {
+            const password = document.getElementById('regPassword').value;
+            const bar = document.getElementById('passwordStrengthBar');
+            let strength = 0;
+
+            if (password.length >= 4) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const percent = (strength / 5) * 100;
+            bar.style.width = percent + '%';
+
+            if (strength <= 1) {
+                bar.style.background = '#dc3545';
+            } else if (strength <= 2) {
+                bar.style.background = '#ffc107';
+            } else if (strength <= 3) {
+                bar.style.background = '#17a2b8';
+            } else {
+                bar.style.background = '#28a745';
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('regName').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const telegramUsername = document.getElementById('regTelegram').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const specialtiesStr = document.getElementById('regSpecialties').value.trim();
+
+            const errorMsg = document.getElementById('registerError');
+            const successMsg = document.getElementById('registerSuccess');
+            errorMsg.classList.add('hidden');
+            successMsg.classList.add('hidden');
+
+            if (!name || !username || !password) {
+                errorMsg.textContent = '❌ Name, username, and password are required';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (password.length < 4) {
+                errorMsg.textContent = '❌ Password must be at least 4 characters';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const specialties = specialtiesStr ? specialtiesStr.split(',').map(s => s.trim()).filter(s => s) : [];
+
+            try {
+                const response = await fetch('/api/services/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name,
+                        username,
+                        password,
+                        telegram_username: telegramUsername,
+                        phone,
+                        specialties,
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successMsg.textContent = `✅ Service registered successfully! Your ID is ${data.id}. You can now login.`;
+                    successMsg.classList.remove('hidden');
+                    document.getElementById('registerForm').reset();
+                    document.getElementById('passwordStrengthBar').style.width = '0%';
+
+                    // Redirect to login after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    errorMsg.textContent = '❌ ' + (data.error || 'Registration failed');
+                    errorMsg.classList.remove('hidden');
+                }
+            } catch (error) {
+                errorMsg.textContent = '❌ Registration error. Please try again.';
+                errorMsg.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

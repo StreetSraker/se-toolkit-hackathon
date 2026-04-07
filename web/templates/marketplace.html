@@ -102,6 +102,8 @@
                 <a href="/configurator" class="nav-link">Configurator</a>
                 <a href="/marketplace" class="nav-link active">Marketplace</a>
                 <a href="/orders" class="nav-link">Orders</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small">Logout</button>
             </nav>
         </header>
 
@@ -116,6 +118,15 @@
     </div>
 
     <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         async function loadMarketplace() {
             try {
                 const response = await fetch('/api/marketplace');

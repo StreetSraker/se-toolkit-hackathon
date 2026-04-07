@@ -291,7 +291,7 @@ WHEELS = [
         "weight": "Factory weight",
         "style": "Original design",
         "price_range": "$0 (no changes)",
-        "image": ""
+        "image": "/static/images/wheels/Stock.png"
     },
     {
         "id": "rays_volk",

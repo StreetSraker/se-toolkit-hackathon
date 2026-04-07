@@ -21,7 +21,7 @@
       "name": "Drift Spec",
       "description": "Drift setup with increased steering angle",
       "ride_height": "-60 mm",
-      "dampening": "Stiff front / средняя rear",
+      "dampening": "Stiff front / medium rear",
       "spring_rate": "10-12 kg/mm",
       "camber": "-2.0° front / -1.0° rear",
       "use_case": "Drift, competitions"
@@ -86,12 +86,12 @@
       "name": "Pandem Wide Arch",
       "description": "Extremely wide arches for maximum effect",
       "components": [
-        "Экстра-широкие frontние арки",
-        "Экстра-широкие rearние арки",
-        "Агрессивный frontний сплиттер",
+        "Extra-wide front arches",
+        "Extra-wide rear arches",
+        "Aggressive front splitter",
         "Rear diffuser",
         "Side skirts",
-        "Большое GT wing"
+        "Large GT wing"
       ],
       "style": "Extreme widebody",
       "price_range": "$2500-4500"
@@ -99,7 +99,7 @@
     "wheels": {
       "id": "rays_volk_g25",
       "name": "Rays Volk Racing G25",
-      "description": "Современная классика от Rays, 5-spoke",
+      "description": "Modern classic from Rays, 5-spoke",
       "sizes": "18x9 / 18x9.5 / 18x10.5",
       "weight": "7.5 kg (18\")",
       "style": "5-spoke",
@@ -142,12 +142,12 @@
       "name": "Pandem Wide Arch",
       "description": "Extremely wide arches for maximum effect",
       "components": [
-        "Экстра-широкие frontние арки",
-        "Экстра-широкие rearние арки",
-        "Агрессивный frontний сплиттер",
+        "Extra-wide front arches",
+        "Extra-wide rear arches",
+        "Aggressive front splitter",
         "Rear diffuser",
         "Side skirts",
-        "Большое GT wing"
+        "Large GT wing"
       ],
       "style": "Extreme widebody",
       "price_range": "$2500-4500"
@@ -155,7 +155,7 @@
     "wheels": {
       "id": "rays_volk_g25",
       "name": "Rays Volk Racing G25",
-      "description": "Современная классика от Rays, 5-spoke",
+      "description": "Modern classic from Rays, 5-spoke",
       "sizes": "18x9 / 18x9.5 / 18x10.5",
       "weight": "7.5 kg (18\")",
       "style": "5-spoke",
@@ -198,8 +198,8 @@
       "name": "Rocket Bunny / Pandem",
       "description": "Wide fiberglass arches, aggressive look",
       "components": [
-        "Широкие frontние крылья",
-        "Широкие rearние крылья",
+        "Wide front fenders",
+        "Wide rear fenders",
         "Front bumper",
         "Rear bumper",
         "Side skirts",
@@ -212,7 +212,7 @@
     "wheels": {
       "id": "rays_volk_g25",
       "name": "Rays Volk Racing G25",
-      "description": "Современная классика от Rays, 5-spoke",
+      "description": "Modern classic from Rays, 5-spoke",
       "sizes": "18x9 / 18x9.5 / 18x10.5",
       "weight": "7.5 kg (18\")",
       "style": "5-spoke",
@@ -245,7 +245,7 @@
       "name": "Drift Spec",
       "description": "Drift setup with increased steering angle",
       "ride_height": "-60 mm",
-      "dampening": "Stiff front / средняя rear",
+      "dampening": "Stiff front / medium rear",
       "spring_rate": "10-12 kg/mm",
       "camber": "-2.0° front / -1.0° rear",
       "use_case": "Drift, competitions"
@@ -276,7 +276,29 @@
     "notes": "",
     "status": "completed",
     "created_at": "2026-04-04 13:41:55",
-    "updated_at": "2026-04-04 13:53:49"
+    "updated_at": "2026-04-07 16:44:58",
+    "status_history": [
+      {
+        "status": "in_progress",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:42:13"
+      },
+      {
+        "status": "claimed",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:44:53"
+      },
+      {
+        "status": "completed",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:44:58"
+      }
+    ],
+    "claimed_by": "SVC-0001",
+    "claimed_at": "2026-04-07 16:44:53"
   },
   {
     "id": "ORD-0006",
@@ -310,12 +332,12 @@
       "name": "Pandem Wide Arch",
       "description": "Extremely wide arches for maximum effect",
       "components": [
-        "Экстра-широкие frontние арки",
-        "Экстра-широкие rearние арки",
-        "Агрессивный frontний сплиттер",
+        "Extra-wide front arches",
+        "Extra-wide rear arches",
+        "Aggressive front splitter",
         "Rear diffuser",
         "Side skirts",
-        "Большое GT wing"
+        "Large GT wing"
       ],
       "style": "Extreme widebody",
       "price_range": "$2500-4500"
@@ -323,7 +345,7 @@
     "wheels": {
       "id": " Volk_racing_ce28n",
       "name": "Rays Volk Racing CE28N",
-      "description": "6-spoke, кованые, идеальны для стэнса",
+      "description": "6-spoke, forged, ideal for stance",
       "sizes": "17x8.5 / 18x9 / 18x9.5",
       "weight": "7.0 kg (17\")",
       "style": "6-spoke",
@@ -332,7 +354,17 @@
     "notes": "",
     "status": "completed",
     "created_at": "2026-04-04 14:14:39",
-    "updated_at": "2026-04-04 14:15:03"
+    "updated_at": "2026-04-07 16:42:10",
+    "claimed_by": "SVC-0001",
+    "claimed_at": "2026-04-07 16:42:10",
+    "status_history": [
+      {
+        "status": "claimed",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:42:10"
+      }
+    ]
   },
   {
     "id": "ORD-0007",
@@ -367,7 +399,7 @@
       "description": "Japanese premium bodykit, track-developed",
       "components": [
         "Carbon hood",
-        "Front bumper с канардами",
+        "Front bumper with canards",
         "Rear diffuser",
         "GT Wing",
         "Side skirts"
@@ -378,16 +410,32 @@
     "wheels": {
       "id": "rays_volk_g25",
       "name": "Rays Volk Racing G25",
-      "description": "Современная классика от Rays, 5-spoke",
+      "description": "Modern classic from Rays, 5-spoke",
       "sizes": "18x9 / 18x9.5 / 18x10.5",
       "weight": "7.5 kg (18\")",
       "style": "5-spoke",
       "price_range": "$1300-1800/set"
     },
     "notes": "",
-    "status": "completed",
+    "status": "in_progress",
     "created_at": "2026-04-04 14:35:53",
-    "updated_at": "2026-04-04 14:36:12"
+    "updated_at": "2026-04-07 16:31:13",
+    "claimed_by": "SVC-0001",
+    "claimed_at": "2026-04-07 16:24:54",
+    "status_history": [
+      {
+        "status": "claimed",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:24:54"
+      },
+      {
+        "status": "in_progress",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:31:13"
+      }
+    ]
   },
   {
     "id": "ORD-0008",
@@ -411,7 +459,7 @@
       "name": "Drift Spec",
       "description": "Drift setup with increased steering angle",
       "ride_height": "-60 mm",
-      "dampening": "Stiff front / средняя rear",
+      "dampening": "Stiff front / medium rear",
       "spring_rate": "10-12 kg/mm",
       "camber": "-2.0° front / -1.0° rear",
       "use_case": "Drift, competitions"
@@ -421,8 +469,8 @@
       "name": "Rocket Bunny / Pandem",
       "description": "Wide fiberglass arches, aggressive look",
       "components": [
-        "Широкие frontние крылья",
-        "Широкие rearние крылья",
+        "Wide front fenders",
+        "Wide rear fenders",
         "Front bumper",
         "Rear bumper",
         "Side skirts",
@@ -435,7 +483,7 @@
     "wheels": {
       "id": "rays_volk_g25",
       "name": "Rays Volk Racing G25",
-      "description": "Современная классика от Rays, 5-spoke",
+      "description": "Modern classic from Rays, 5-spoke",
       "sizes": "18x9 / 18x9.5 / 18x10.5",
       "weight": "7.5 kg (18\")",
       "style": "5-spoke",
@@ -444,7 +492,17 @@
     "notes": "",
     "status": "completed",
     "created_at": "2026-04-04 14:59:54",
-    "updated_at": "2026-04-04 15:00:17"
+    "updated_at": "2026-04-07 16:24:44",
+    "claimed_by": "SVC-0002",
+    "claimed_at": "2026-04-07 16:24:44",
+    "status_history": [
+      {
+        "status": "claimed",
+        "by": "SVC-0002",
+        "by_name": "BigCustoms",
+        "at": "2026-04-07 16:24:44"
+      }
+    ]
   },
   {
     "id": "ORD-0009",
@@ -466,7 +524,7 @@
     "suspension": {
       "id": "drift",
       "camber": "-2.0° front / -1.0° rear",
-      "dampening": "Stiff front / средняя rear",
+      "dampening": "Stiff front / medium rear",
       "description": "Drift setup with increased steering angle",
       "name": "Drift Spec",
       "ride_height": "-60 mm",
@@ -476,7 +534,7 @@
     "bodykit": {
       "components": [
         "Carbon hood",
-        "Front bumper с канардами",
+        "Front bumper with canards",
         "Rear diffuser",
         "GT Wing",
         "Side skirts"
@@ -497,8 +555,128 @@
       "weight": "7.2 kg (17\")"
     },
     "notes": "",
-    "status": "cancelled",
+    "status": "in_progress",
     "created_at": "2026-04-05 20:32:39",
-    "updated_at": "2026-04-05 20:46:39"
+    "updated_at": "2026-04-07 16:31:10",
+    "claimed_by": "SVC-0001",
+    "claimed_at": "2026-04-07 14:07:31",
+    "status_history": [
+      {
+        "status": "claimed",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 14:07:31"
+      },
+      {
+        "status": "in_progress",
+        "by": "SVC-0001",
+        "by_name": "ProjectD",
+        "at": "2026-04-07 16:31:10"
+      }
+    ]
+  },
+  {
+    "id": "ORD-0010",
+    "user_id": "web-user",
+    "username": "Web User",
+    "car": {
+      "description": "Legendary Japanese sports car with the inline-six 2JZ-GTE",
+      "id": "supra",
+      "image": "/static/images/cars/supra.svg",
+      "name": "Toyota Supra A80",
+      "years": "1993-2002"
+    },
+    "engine": {
+      "description": "Original stock engine, no modifications",
+      "id": "stock",
+      "name": "Stock Engine",
+      "power": "280 hp"
+    },
+    "suspension": {
+      "id": "stock",
+      "camber": "Factory angle",
+      "dampening": "Factory setting",
+      "description": "Original stock suspension, no modifications",
+      "name": "Stock Suspension",
+      "ride_height": "Stock height",
+      "spring_rate": "Factory springs",
+      "use_case": "Original condition, daily driving"
+    },
+    "bodykit": {
+      "components": [],
+      "description": "Original body, no modifications",
+      "id": "stock",
+      "image": "/static/images/bodykits/Stock.png",
+      "name": "Stock Body",
+      "price_range": "$0 (no changes)",
+      "style": "Original factory look"
+    },
+    "wheels": {
+      "description": "Original factory wheels",
+      "id": "stock",
+      "image": "/static/images/wheels/Stock.png",
+      "name": "Stock Wheels",
+      "price_range": "$0 (no changes)",
+      "sizes": "Factory size",
+      "style": "Original design",
+      "weight": "Factory weight"
+    },
+    "notes": "",
+    "contacts": "",
+    "status": "new",
+    "claimed_by": null,
+    "claimed_at": null,
+    "status_history": [
+      {
+        "status": "new",
+        "by": "system",
+        "by_name": "System",
+        "at": "2026-04-07 16:39:27"
+      }
+    ],
+    "created_at": "2026-04-07 16:39:27",
+    "updated_at": "2026-04-07 16:39:27"
+  },
+  {
+    "id": "ORD-0011",
+    "user_id": "USR-0001",
+    "username": "bottest",
+    "car": {
+      "id": "supra",
+      "name": "Toyota Supra A80",
+      "years": "1993-2002"
+    },
+    "engine": {
+      "id": "stock",
+      "name": "2JZ-GTE Stock",
+      "power": "280 hp"
+    },
+    "suspension": {
+      "id": "street",
+      "name": "Street Comfort"
+    },
+    "bodykit": {
+      "id": "stock",
+      "name": "Stock Body"
+    },
+    "wheels": {
+      "id": "stock",
+      "name": "Stock Wheels"
+    },
+    "notes": "",
+    "contacts": "Telegram: @bottest",
+    "status": "new",
+    "claimed_by": null,
+    "claimed_at": null,
+    "status_history": [
+      {
+        "status": "new",
+        "by": "system",
+        "by_name": "System",
+        "at": "2026-04-07 17:19:03"
+      }
+    ],
+    "created_at": "2026-04-07 17:19:03",
+    "updated_at": "2026-04-07 17:19:03"
   }
 ]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "USR-0001",
+    "username": "streetsraker",
+    "password_hash": "scrypt:32768:8:1$QgTi5zuJwBzlC86t$bd81c7ed5f14b6b67565967d90fa3c72309e1ab2f6a83df1a14c34b37cab1ba6fbc98c988804821c799eebe1ea4d5bac6d5e3e689e8805c4442bdbcab9cb1b46",
+    "telegram": "@Streetsrak3r",
+    "phone": "+7 (937) 714-92-23",
+    "email": "kim842058@gmail.com",
+    "is_active": true,
+    "registered_at": "2026-04-07 17:35:32"
+  },
+  {
+    "id": "USR-0002",
+    "username": "customer",
+    "password_hash": "scrypt:32768:8:1$AXM3Yyt0eW7oBhaH$8f459c9f97f8f9bbdec4fb769c10495f2af8ab6b3c277f1bd733734c6c1a30f19e18ce41c20fbf81c73e66d4be8089f9b12e3c9824a360f7fe7acb8a7efb0872",
+    "telegram": "@Test",
+    "phone": "+x (xxx) xxx-xx-xx",
+    "email": "test@mail.ru",
+    "is_active": true,
+    "registered_at": "2026-04-07 17:37:59"
+  }
+]

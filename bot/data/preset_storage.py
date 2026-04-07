@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'db')
 PRESETS_FILE = os.path.join(DATA_DIR, 'custom_presets.json')
 UPLOADS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'images', 'cars', 'uploads')
 

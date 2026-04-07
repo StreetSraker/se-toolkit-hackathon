@@ -9,8 +9,15 @@
 <body>
     <div class="container">
         <header class="header">
-            <a href="/" class="back-link">← Back</a>
             <h1>📋 My Orders</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/configurator" class="nav-link">Configurator</a>
+                <a href="/marketplace" class="nav-link">Marketplace</a>
+                <a href="/orders" class="nav-link active">Orders</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small">Logout</button>
+            </nav>
         </header>
 
         <div id="ordersList" class="orders-list">
@@ -23,5 +30,15 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
+    <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
 </body>
 </html>

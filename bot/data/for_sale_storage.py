@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'db')
 FOR_SALE_FILE = os.path.join(DATA_DIR, 'for_sale_cars.json')
 
 # Store images inside the shared bot_data volume so they survive container rebuilds
@@ -37,7 +37,7 @@ def _save_cars(cars):
         json.dump(cars, f, ensure_ascii=False, indent=2)
 
 
-def save_car(car_data):
+def save_car(car_data, service_id=None):
     """
     Save a new pre-modified car for sale.
 
@@ -45,6 +45,7 @@ def save_car(car_data):
         car_data: dict with keys: name, base_car_id, description, price,
                   questionnaire (mileage, year, condition, mods_list, etc.),
                   engine, suspension, bodykit, wheels, is_available
+        service_id: ID of the service creating this car
 
     Returns:
         dict: The saved car with added id, timestamps
@@ -68,6 +69,7 @@ def save_car(car_data):
         'wheels': car_data.get('wheels', {}),
         'images': car_data.get('images', []),
         'is_available': car_data.get('is_available', True),
+        'created_by_service_id': service_id,
         'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'updated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     }
@@ -78,12 +80,13 @@ def save_car(car_data):
     return car
 
 
-def get_all_cars(available_only=False):
+def get_all_cars(available_only=False, service_id=None):
     """
     Get all pre-modified cars for sale.
 
     Args:
         available_only: If True, return only available cars
+        service_id: If provided, return only cars created by this service
 
     Returns:
         list: List of cars, newest first
@@ -91,6 +94,8 @@ def get_all_cars(available_only=False):
     cars = _load_cars()
     if available_only:
         cars = [c for c in cars if c.get('is_available', True)]
+    if service_id:
+        cars = [c for c in cars if c.get('created_by_service_id') == service_id]
     return list(reversed(cars))
 
 

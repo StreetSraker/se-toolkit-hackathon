@@ -20,6 +20,111 @@
             object-fit: cover;
             border-radius: 12px;
             display: block;
+            cursor: grab;
+            user-select: none;
+        }
+        .main-image:active {
+            cursor: grabbing;
+        }
+        .main-image.zoomed {
+            object-fit: contain;
+            cursor: zoom-out;
+        }
+        .image-viewer {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background: #1a1a2e;
+            height: 500px;
+        }
+        .image-viewer img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            max-width: none;
+            transition: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        .image-viewer-placeholder {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 6em;
+        }
+        .zoom-controls {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .image-viewer:hover .zoom-controls {
+            opacity: 1;
+        }
+        .zoom-btn {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.2s, transform 0.1s;
+            user-select: none;
+        }
+        .zoom-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+        .zoom-level {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .image-viewer:hover .zoom-level {
+            opacity: 1;
+        }
+        .zoom-hint {
+            position: absolute;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .image-viewer.show-hint .zoom-hint {
+            opacity: 1;
         }
         .main-image-placeholder {
             width: 100%;
@@ -171,6 +276,8 @@
             align-items: center;
             justify-content: center;
             color: #666;
+            background: #1a1a2e;
+            border-radius: 12px;
         }
     </style>
 </head>
@@ -181,8 +288,10 @@
             <nav class="main-nav">
                 <a href="/" class="nav-link">Home</a>
                 <a href="/configurator" class="nav-link">Configurator</a>
-                <a href="/marketplace" class="nav-link active">Marketplace</a>
+                <a href="/marketplace" class="nav-link">Marketplace</a>
                 <a href="/orders" class="nav-link">Orders</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small">Logout</button>
             </nav>
         </header>
 
@@ -194,42 +303,75 @@
     </div>
 
     <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         let currentImageIndex = 0;
         let carData = null;
+
+        // Pan/Zoom state
+        let viewerState = {
+            scale: 1,
+            panning: false,
+            pointX: 0,
+            pointY: 0,
+            startX: 0,
+            startY: 0,
+            imgWidth: 0,
+            imgHeight: 0,
+            viewerWidth: 0,
+            viewerHeight: 0,
+        };
 
         async function loadCar(carId) {
             try {
                 const response = await fetch(`/api/marketplace/${carId}`);
                 if (!response.ok) {
-                    document.getElementById('carDetail').innerHTML = 
+                    document.getElementById('carDetail').innerHTML =
                         '<div class="loading-placeholder">Car not found</div>';
                     return;
                 }
                 carData = await response.json();
                 renderCar(carData);
+                initViewer();
             } catch (error) {
                 console.error('Error loading car:', error);
-                document.getElementById('carDetail').innerHTML = 
+                document.getElementById('carDetail').innerHTML =
                     '<div class="loading-placeholder">Loading error</div>';
             }
         }
 
         function renderCar(car) {
             const container = document.getElementById('carDetail');
-            
+
             const questionnaire = car.questionnaire || {};
             const modsList = questionnaire.mods_list ? questionnaire.mods_list.split('\n').filter(x => x.trim()) : [];
-            
+
             container.innerHTML = `
                 <!-- Image Gallery -->
                 <div class="image-gallery">
                     ${car.images && car.images.length > 0
-                        ? `<img id="mainImage" src="${car.images[0]}" alt="${car.name}" class="main-image">`
-                        : `<div class="main-image-placeholder">🚗</div>`
+                        ? `<div class="image-viewer" id="imageViewer">
+                            <img id="mainImage" src="${car.images[0]}" alt="${car.name}" draggable="false">
+                            <div class="zoom-hint">🖱️ Scroll to zoom • Drag to pan • Double-click to reset</div>
+                            <div class="zoom-level" id="zoomLevel">100%</div>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                                <button class="zoom-btn" onclick="resetZoom()" title="Reset">⟲</button>
+                            </div>
+                           </div>`
+                        : `<div class="image-viewer-placeholder">🚗</div>`
                     }
                     ${car.images && car.images.length > 1
                         ? `<div class="thumbnail-strip">
-                            ${car.images.map((img, idx) => 
+                            ${car.images.map((img, idx) =>
                                 `<img src="${img}" class="thumbnail ${idx === 0 ? 'active' : ''}" onclick="switchImage(${idx})">`
                             ).join('')}
                            </div>`
@@ -330,10 +472,198 @@
             `;
         }
 
+        function initViewer() {
+            const viewer = document.getElementById('imageViewer');
+            const img = document.getElementById('mainImage');
+            if (!viewer || !img) return;
+
+            // Show hint briefly
+            viewer.classList.add('show-hint');
+            setTimeout(() => viewer.classList.remove('show-hint'), 3000);
+
+            // Wait for image to load to get dimensions
+            img.onload = () => {
+                const viewerRect = viewer.getBoundingClientRect();
+                viewerState.viewerWidth = viewerRect.width;
+                viewerState.viewerHeight = viewerRect.height;
+                viewerState.imgWidth = img.naturalWidth;
+                viewerState.imgHeight = img.naturalHeight;
+
+                // Fit image to viewer initially
+                const scaleX = viewerState.viewerWidth / viewerState.imgWidth;
+                const scaleY = viewerState.viewerHeight / viewerState.imgHeight;
+                viewerState.scale = Math.min(scaleX, scaleY);
+                viewerState.pointX = (viewerState.viewerWidth - viewerState.imgWidth * viewerState.scale) / 2;
+                viewerState.pointY = (viewerState.viewerHeight - viewerState.imgHeight * viewerState.scale) / 2;
+                updateTransform();
+            };
+
+            // Mouse events
+            viewer.addEventListener('mousedown', onMouseDown);
+            viewer.addEventListener('mousemove', onMouseMove);
+            viewer.addEventListener('mouseup', onMouseUp);
+            viewer.addEventListener('mouseleave', onMouseUp);
+            viewer.addEventListener('wheel', onWheel, { passive: false });
+            viewer.addEventListener('dblclick', resetZoom);
+
+            // Touch events for mobile
+            let lastTouchDistance = null;
+            viewer.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    viewerState.panning = true;
+                    viewerState.startX = e.touches[0].clientX - viewerState.pointX;
+                    viewerState.startY = e.touches[0].clientY - viewerState.pointY;
+                } else if (e.touches.length === 2) {
+                    viewerState.panning = false;
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+                }
+            });
+            viewer.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (e.touches.length === 1 && viewerState.panning) {
+                    viewerState.pointX = e.touches[0].clientX - viewerState.startX;
+                    viewerState.pointY = e.touches[0].clientY - viewerState.startY;
+                    constrainPan();
+                    updateTransform();
+                } else if (e.touches.length === 2 && lastTouchDistance !== null) {
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const delta = distance - lastTouchDistance;
+                    const zoomFactor = delta > 0 ? 1.05 : 0.95;
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - viewer.getBoundingClientRect().left;
+                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - viewer.getBoundingClientRect().top;
+                    zoomAt(centerX, centerY, zoomFactor);
+                    lastTouchDistance = distance;
+                }
+            }, { passive: false });
+            viewer.addEventListener('touchend', () => {
+                viewerState.panning = false;
+                lastTouchDistance = null;
+            });
+        }
+
+        function onMouseDown(e) {
+            if (viewerState.scale <= 1) return;
+            e.preventDefault();
+            viewerState.panning = true;
+            viewerState.startX = e.clientX - viewerState.pointX;
+            viewerState.startY = e.clientY - viewerState.pointY;
+            document.getElementById('imageViewer').style.cursor = 'grabbing';
+        }
+
+        function onMouseMove(e) {
+            if (!viewerState.panning) return;
+            e.preventDefault();
+            viewerState.pointX = e.clientX - viewerState.startX;
+            viewerState.pointY = e.clientY - viewerState.startY;
+            constrainPan();
+            updateTransform();
+        }
+
+        function onMouseUp() {
+            viewerState.panning = false;
+            const viewer = document.getElementById('imageViewer');
+            if (viewer) viewer.style.cursor = viewerState.scale > 1 ? 'grab' : 'default';
+        }
+
+        function onWheel(e) {
+            e.preventDefault();
+            const viewer = document.getElementById('imageViewer');
+            const rect = viewer.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            zoomAt(mouseX, mouseY, zoomFactor);
+        }
+
+        function zoomAt(x, y, factor) {
+            const newScale = Math.max(0.1, Math.min(10, viewerState.scale * factor));
+            if (newScale === viewerState.scale) return;
+
+            // Zoom towards the mouse position
+            viewerState.pointX = x - (x - viewerState.pointX) * (newScale / viewerState.scale);
+            viewerState.pointY = y - (y - viewerState.pointY) * (newScale / viewerState.scale);
+            viewerState.scale = newScale;
+
+            constrainPan();
+            updateTransform();
+        }
+
+        function constrainPan() {
+            const scaledWidth = viewerState.imgWidth * viewerState.scale;
+            const scaledHeight = viewerState.imgHeight * viewerState.scale;
+
+            // Don't allow panning if image fits
+            if (scaledWidth <= viewerState.viewerWidth) {
+                viewerState.pointX = (viewerState.viewerWidth - scaledWidth) / 2;
+            } else {
+                const maxX = 0;
+                const minX = viewerState.viewerWidth - scaledWidth;
+                viewerState.pointX = Math.max(minX, Math.min(maxX, viewerState.pointX));
+            }
+
+            if (scaledHeight <= viewerState.viewerHeight) {
+                viewerState.pointY = (viewerState.viewerHeight - scaledHeight) / 2;
+            } else {
+                const maxY = 0;
+                const minY = viewerState.viewerHeight - scaledHeight;
+                viewerState.pointY = Math.max(minY, Math.min(maxY, viewerState.pointY));
+            }
+        }
+
+        function updateTransform() {
+            const img = document.getElementById('mainImage');
+            if (!img) return;
+            img.style.transform = `translate(${viewerState.pointX}px, ${viewerState.pointY}px) scale(${viewerState.scale})`;
+            img.style.transformOrigin = '0 0';
+
+            // Update zoom level display
+            const zoomLevel = document.getElementById('zoomLevel');
+            if (zoomLevel) zoomLevel.textContent = Math.round(viewerState.scale * 100) + '%';
+        }
+
+        function zoomIn() {
+            const viewer = document.getElementById('imageViewer');
+            const rect = viewer.getBoundingClientRect();
+            zoomAt(rect.width / 2, rect.height / 2, 1.3);
+        }
+
+        function zoomOut() {
+            const viewer = document.getElementById('imageViewer');
+            const rect = viewer.getBoundingClientRect();
+            zoomAt(rect.width / 2, rect.height / 2, 0.7);
+        }
+
+        function resetZoom() {
+            if (!carData || !carData.images) return;
+            const viewer = document.getElementById('imageViewer');
+            const img = document.getElementById('mainImage');
+            if (!viewer || !img) return;
+
+            const viewerRect = viewer.getBoundingClientRect();
+            viewerState.viewerWidth = viewerRect.width;
+            viewerState.viewerHeight = viewerRect.height;
+
+            const scaleX = viewerState.viewerWidth / viewerState.imgWidth;
+            const scaleY = viewerState.viewerHeight / viewerState.imgHeight;
+            viewerState.scale = Math.min(scaleX, scaleY);
+            viewerState.pointX = (viewerState.viewerWidth - viewerState.imgWidth * viewerState.scale) / 2;
+            viewerState.pointY = (viewerState.viewerHeight - viewerState.imgHeight * viewerState.scale) / 2;
+            updateTransform();
+        }
+
         function switchImage(index) {
             if (!carData || !carData.images) return;
             currentImageIndex = index;
-            document.getElementById('mainImage').src = carData.images[index];
+            const img = document.getElementById('mainImage');
+            img.onload = () => {
+                // Reset zoom for new image
+                resetZoom();
+            };
+            img.src = carData.images[index];
             document.querySelectorAll('.thumbnail').forEach((thumb, idx) => {
                 thumb.classList.toggle('active', idx === index);
             });

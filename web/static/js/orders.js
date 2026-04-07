@@ -1,16 +1,34 @@
 // Orders Page JavaScript
 
 document.addEventListener('DOMContentLoaded', function() {
+    checkAuth();
     loadOrders();
 });
 
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/auth/check');
+        const data = await response.json();
+
+        if (!data.is_authenticated) {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Error checking auth:', error);
+    }
+}
+
 async function loadOrders() {
     const container = document.getElementById('ordersList');
-    
+
     try {
         const response = await fetch('/api/orders');
+        if (response.status === 403) {
+            window.location.href = '/login';
+            return;
+        }
         const orders = await response.json();
-        
+
         if (orders.length === 0) {
             container.innerHTML = `
                 <div class="info-box">
@@ -21,7 +39,7 @@ async function loadOrders() {
             `;
             return;
         }
-        
+
         displayOrders(orders);
     } catch (error) {
         console.error('Error loading orders:', error);
@@ -51,7 +69,8 @@ function displayOrders(orders) {
         const status = order.status || 'new';
         const statusName = statusNames[status] || status;
         const statusClass = statusClasses[status] || 'status-new';
-        
+        const contacts = order.contacts || '';
+
         return `
             <div class="order-card">
                 <div class="order-header">
@@ -66,6 +85,7 @@ function displayOrders(orders) {
                     <div><strong>🔧 Suspension:</strong> ${order.suspension?.name || 'N/A'}</div>
                     <div><strong>🎨 Bodykit:</strong> ${order.bodykit?.name || 'N/A'}</div>
                     <div><strong>🛞 Wheels:</strong> ${order.wheels?.name || 'N/A'}</div>
+                    ${contacts ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #3a3a4e;"><strong>📞 Contact:</strong> ${contacts}</div>` : ''}
                 </div>
                 <div class="order-date">
                     Created: ${order.created_at}

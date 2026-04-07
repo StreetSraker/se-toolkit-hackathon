@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔧 Service Management</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link">Dashboard</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/for-sale" class="nav-link">Car Sales</a>
+                <a href="/stats" class="nav-link">Statistics</a>
+                <a href="/services" class="nav-link active">Services</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
+            </nav>
+        </header>
+
+        <!-- Services List -->
+        <div class="services-list-section">
+            <h2>📋 Registered Services</h2>
+            <p style="color: #888; margin-bottom: 20px;">
+                New services can register at <a href="/register" target="_blank">/register</a>
+            </p>
+            <div id="servicesList" class="services-grid">
+                <p class="loading">Loading services...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Detail Modal -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="serviceDetail"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin_services.js') }}"></script>
+</body>
+</html>
