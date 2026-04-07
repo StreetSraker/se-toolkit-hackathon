@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+*.md
+*.bat
+__pycache__
+*.pyc
+.env.example
+stop_all.bat
+run_*.bat
+open_firewall.bat

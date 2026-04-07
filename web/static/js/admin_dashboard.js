@@ -53,23 +53,23 @@ async function loadRecentOrders() {
         const orders = await response.json();
         
         if (orders.length === 0) {
-            container.innerHTML = '<p class="loading">📋 Заказов нет</p>';
+            container.innerHTML = '<p class="loading">📋 No orders</p>';
             return;
         }
         
         displayOrders(orders.slice(0, 5), container);
     } catch (error) {
         console.error('Error loading orders:', error);
-        container.innerHTML = '<p class="loading">Ошибка при загрузке заказов</p>';
+        container.innerHTML = '<p class="loading">Error loading orders</p>';
     }
 }
 
 function displayOrders(orders, container) {
     const statusNames = {
-        'new': '🆕 Новый',
-        'in_progress': '🔧 В работе',
-        'completed': '✅ Выполнен',
-        'cancelled': '❌ Отменён'
+        'new': '🆕 New',
+        'in_progress': '🔧 In Progress',
+        'completed': '✅ Completed',
+        'cancelled': '❌ Cancelled'
     };
     
     const statusClasses = {
@@ -100,7 +100,7 @@ function displayOrders(orders, container) {
                     <div><strong>⚙️</strong> ${order.engine?.name || 'N/A'}</div>
                 </div>
                 <div class="order-date">
-                    Создан: ${order.created_at}
+                    Created: ${order.created_at}
                 </div>
             </div>
         `;

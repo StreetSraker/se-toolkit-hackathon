@@ -1,27 +1,45 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои заказы - JDM Config Web</title>
+    <title>My Orders - JDM Config Web</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <a href="/" class="back-link">← Назад</a>
-            <h1>📋 Мои заказы</h1>
+            <h1 data-i18n="orders.title"> My Orders</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link" data-i18n="configurator.home">Home</a>
+                <a href="/configurator" class="nav-link" data-i18n="configurator.configurator">Configurator</a>
+                <a href="/marketplace" class="nav-link" data-i18n="index.marketplace">Marketplace</a>
+                <a href="/orders" class="nav-link active" data-i18n="index.myOrders">Orders</a>
+                <a href="/profile" class="nav-link" data-i18n="index.profile">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small" data-i18n="common.logout">Logout</button>
+            </nav>
         </header>
 
         <div id="ordersList" class="orders-list">
-            <p class="loading">Загрузка заказов...</p>
+            <p class="loading" data-i18n="orders.loadingOrders">Loading orders...</p>
         </div>
 
         <div class="action-buttons">
-            <a href="/configurator" class="btn btn-primary">🚗 Конфигуратор</a>
+            <a href="/configurator" class="btn btn-primary" data-i18n="configurator.configurator"> Configurator</a>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/orders.js') }}"></script>
+    <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
 </body>
 </html>

@@ -1,20 +1,23 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дашборд - Панель сервиса JDM</title>
+    <title>Dashboard - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🔧 Панель сервиса</h1>
+            <h1 data-i18n="admin.title"> Service Panel</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link active">Дашборд</a>
-                <a href="/orders" class="nav-link">Заказы</a>
-                <a href="/stats" class="nav-link">Статистика</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+                <a href="/dashboard" class="nav-link active" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
             </nav>
         </header>
 
@@ -22,33 +25,34 @@
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-number" id="statTotal">0</div>
-                <div class="stat-label">Всего заказов</div>
+                <div class="stat-label" data-i18n="admin.totalOrders">Total orders</div>
             </div>
             <div class="stat-card stat-new">
                 <div class="stat-number" id="statNew">0</div>
-                <div class="stat-label">🆕 Новые</div>
+                <div class="stat-label" data-i18n="admin.newOrders"> New</div>
             </div>
             <div class="stat-card stat-progress">
                 <div class="stat-number" id="statProgress">0</div>
-                <div class="stat-label">🔧 В работе</div>
+                <div class="stat-label" data-i18n="admin.inProgress"> In Progress</div>
             </div>
             <div class="stat-card stat-completed">
                 <div class="stat-number" id="statCompleted">0</div>
-                <div class="stat-label">✅ Выполнены</div>
+                <div class="stat-label" data-i18n="admin.completed"> Completed</div>
             </div>
             <div class="stat-card stat-cancelled">
                 <div class="stat-number" id="statCancelled">0</div>
-                <div class="stat-label">❌ Отменены</div>
+                <div class="stat-label" data-i18n="admin.cancelled"> Cancelled</div>
             </div>
         </div>
 
         <!-- Recent Orders -->
-        <h2 style="margin: 30px 0 20px; color: #ff6b6b;">📋 Последние заказы</h2>
+        <h2 style="margin: 30px 0 20px; color: var(--accent-primary);" data-i18n="admin.recentOrders"> Recent Orders</h2>
         <div id="recentOrders" class="orders-list">
-            <p class="loading">Загрузка...</p>
+            <p class="loading" data-i18n="common.loading">Loading...</p>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}"></script>
 </body>
 </html>
