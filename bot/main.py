@@ -1,8 +1,8 @@
-"""Main bot application - single ConversationHandler architecture"""
+"""Main bot application - Client order tracking only"""
 
 import os
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -12,8 +12,9 @@ from telegram.ext import (
     ContextTypes,
     ConversationHandler,
 )
-from bot.data.car_config_data import CARS, ENGINES, SUSPENSIONS, BODYKITS, WHEELS
-from bot.data.storage import save_order, get_all_orders, get_order, update_order_status, get_order_stats
+from bot.data.storage import get_order
+from bot.data.users_storage import register_user, authenticate_user, get_user_by_username
+from bot.data.services_storage import get_service
 
 # Enable logging
 logging.basicConfig(
@@ -25,23 +26,22 @@ logger = logging.getLogger(__name__)
 # Conversation states
 (
     MAIN_MENU,
-    # Config states
-    SELECT_CAR, SELECT_ENGINE, SELECT_SUSPENSION, SELECT_BODYKIT, SELECT_WHEEL, CONFIG_SUMMARY,
-    # Order states
-    ORDER_REVIEW, ORDER_CONFIRMED,
-    # Admin states
-    ADMIN_AUTH, ADMIN_MENU, ADMIN_ORDER_LIST, ADMIN_ORDER_DETAIL,
-) = range(13)
-
-# Admin settings
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'service2024')
+    AUTH_USERNAME,
+    AUTH_PASSWORD,
+    REG_USERNAME,
+    REG_PASSWORD,
+    REG_TELEGRAM,
+    REG_PHONE,
+    REG_EMAIL,
+    ORDER_DETAIL,
+) = range(9)
 
 # Status display
 STATUS_NAMES = {
-    'new': '🆕 Новый',
-    'in_progress': '🔧 В работе',
-    'completed': '✅ Выполнен',
-    'cancelled': '❌ Отменён',
+    'new': '🆕 New',
+    'in_progress': '🔧 In Progress',
+    'completed': '✅ Completed',
+    'cancelled': '❌ Cancelled',
 }
 STATUS_EMOJI = {
     'new': '🆕',
@@ -55,574 +55,514 @@ STATUS_EMOJI = {
 
 def _main_menu_keyboard():
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🚗 Конфигуратор", callback_data="menu_config")],
-        [InlineKeyboardButton("📋 Мои заказы", callback_data="menu_orders")],
-        [InlineKeyboardButton("🔧 Панель сервиса", callback_data="menu_admin")],
-        [InlineKeyboardButton("ℹ️ О сервисе", callback_data="menu_about")],
+        [InlineKeyboardButton("📋 My Orders", callback_data="my_orders")],
+        [InlineKeyboardButton("ℹ️ About", callback_data="about")],
     ])
-
-
-async def show_main_menu(update: Update) -> int:
-    """Show main menu screen"""
-    text = (
-        f"👋 Привет, {update.effective_user.first_name}!\n\n"
-        f"🏎️ <b>JDM Config Bot</b> — сервис для заказа автомобилей из 90-х и 00-х с индивидуальной настройкой\n\n"
-        f"Выберите действие:"
-    )
-    if update.message:
-        await update.message.reply_text(text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
-    elif update.callback_query:
-        await update.callback_query.edit_message_text(text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
-    return MAIN_MENU
 
 
 async def _edit(update: Update, text: str, **kwargs):
     """Edit message or reply"""
     if update.callback_query:
-        await update.callback_query.edit_message_text(text, **kwargs)
+        try:
+            await update.callback_query.edit_message_text(text, **kwargs)
+        except Exception:
+            if update.callback_query.message:
+                await update.callback_query.message.reply_text(text, **kwargs)
     elif update.effective_message:
         await update.effective_message.reply_text(text, **kwargs)
 
 
-# ==================== Main Menu ====================
+def _get_user_from_session(context):
+    """Get user info from session or return None"""
+    return context.user_data.get('auth_user')
+
+
+async def _require_auth(update, context):
+    """Check if user is authenticated, redirect to login if not"""
+    user = _get_user_from_session(context)
+    if user:
+        return True
+    text = (
+        "🔐 <b>Authentication required</b>\n\n"
+        "Please log in or register to continue.\n\n"
+        "Choose an option:"
+    )
+    kb = [
+        [InlineKeyboardButton("🔑 Login", callback_data="auth_login")],
+        [InlineKeyboardButton("📝 Register", callback_data="auth_register")],
+        [InlineKeyboardButton("ℹ️ About", callback_data="about")],
+    ]
+    await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
+    return False
+
+
+# ==================== Commands ====================
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    return await show_main_menu(update)
+    """Handle /start command"""
+    user = _get_user_from_session(context)
+    if user:
+        return await show_main_menu(update, context)
+    else:
+        text = (
+            f"👋 Hello, {update.effective_user.first_name}!\n\n"
+            f"🏎️ <b>JDM Config Bot</b>\n\n"
+            f"Track your car order status and see which service is working on it.\n\n"
+            f"Please log in or register to continue:"
+        )
+        kb = [
+            [InlineKeyboardButton("🔑 Login", callback_data="auth_login")],
+            [InlineKeyboardButton("📝 Register", callback_data="auth_register")],
+            [InlineKeyboardButton("ℹ️ About", callback_data="about")],
+        ]
+        await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
+        return MAIN_MENU
+
+
+async def cmd_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Cancel current operation"""
+    await update.message.reply_text("❌ Cancelled.")
+    context.user_data.clear()
+    return await cmd_start(update, context)
+
+
+# ==================== Main Menu ====================
+
+async def show_main_menu(update, context) -> int:
+    """Show main menu for authenticated user"""
+    user = _get_user_from_session(context)
+    if not user:
+        return await cmd_start(update, context)
+
+    from bot.data.storage import get_all_orders
+    all_orders = get_all_orders()
+    my_orders = [o for o in all_orders if o.get('user_id') == user['id']]
+
+    text = (
+        f"👋 Hello, <b>{user['username']}</b>!\n\n"
+        f"📊 You have <b>{len(my_orders)}</b> order(s).\n\n"
+        f"Choose an action:"
+    )
+    await _edit(update, text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
+    return MAIN_MENU
 
 
 async def menu_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle main menu callbacks"""
     query = update.callback_query
     await query.answer()
     data = query.data
 
-    if data == "menu_about":
-        await query.edit_message_text(
-            "ℹ️ <b>О сервисе</b>\n\n"
-            "Мы помогаем заказать автомобили из 90-х и 00-х с индивидуальной настройкой:\n\n"
-            "• Подбор двигателя и тюнинга\n"
-            "• Настройка подвески\n"
-            "• Установка обвесов\n"
-            "• Подбор колёсных дисков\n\n"
-            "Все работы выполняются профессиональными мастерами с опытом работы с JDM автомобилями."
-            "\n\n📞 Для связи с менеджером: @manager_username",
+    if data == "about":
+        await _edit(update,
+            "ℹ️ <b>About the Service</b>\n\n"
+            "We help order cars from the 90s and 00s with custom configuration:\n\n"
+            "• Engine selection and tuning\n"
+            "• Suspension setup\n"
+            "• Bodykit installation\n"
+            "• Wheel selection\n\n"
+            "All work is performed by professional technicians experienced with JDM vehicles.\n\n"
+            "🌐 <b>Web client:</b> use our website to configure and order cars.\n"
+            "🤖 <b>This bot:</b> track your order status and see which service is working on it.",
             parse_mode='HTML',
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Назад", callback_data="back_to_main")]])
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("⬅️ Back", callback_data="back_to_main")]])
         )
         return MAIN_MENU
 
-    elif data == "menu_config":
-        return await start_config(update, context)
-
-    elif data == "menu_orders":
-        return await start_orders(update, context)
-
-    elif data == "menu_admin":
-        return await start_admin(update, context)
+    elif data == "my_orders":
+        return await show_my_orders(update, context)
 
     elif data == "back_to_main":
-        return await show_main_menu(update)
+        return await show_main_menu(update, context)
 
     return MAIN_MENU
 
 
-# ==================== Config Flow ====================
+# ==================== Authentication ====================
 
-async def start_config(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['config'] = {}
-    keyboard = [[InlineKeyboardButton(f"{c['name']} ({c['years']})", callback_data=f"car_{c['id']}")] for c in CARS]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_main")])
-    await update.callback_query.edit_message_text(
-        "🚗 <b>Конфигуратор автомобиля</b>\n\nВыберите автомобиль:",
-        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    return SELECT_CAR
-
-
-async def select_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    car_id = query.data.replace("car_", "")
-    car = next((c for c in CARS if c['id'] == car_id), None)
-    if not car:
-        return SELECT_CAR
-    context.user_data['config']['car'] = car
-    engines = ENGINES.get(car_id, [])
-    keyboard = [[InlineKeyboardButton(e['name'], callback_data=f"engine_{e['id']}")] for e in engines]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_car")])
-    await query.edit_message_text(
-        f"🚗 <b>{car['name']}</b>\nГоды: {car['years']}\n{car['description']}\n\n⚙️ Выберите двигатель:",
-        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    return SELECT_ENGINE
-
-
-async def select_engine(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    engine_id = query.data.replace("engine_", "")
-    car_id = context.user_data['config']['car']['id']
-    engine = next((e for e in ENGINES.get(car_id, []) if e['id'] == engine_id), None)
-    if not engine:
-        return SELECT_ENGINE
-    context.user_data['config']['engine'] = engine
-    keyboard = [[InlineKeyboardButton(s['name'], callback_data=f"susp_{sid}")] for sid, s in SUSPENSIONS.items()]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_engine")])
-    await query.edit_message_text(
-        f"⚙️ <b>{engine['name']}</b>\nМощность: {engine['power']}\n{engine['description']}\n\n🔧 Выберите подвеску:",
-        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    return SELECT_SUSPENSION
-
-
-async def select_suspension(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    sid = query.data.replace("susp_", "")
-    susp = SUSPENSIONS.get(sid)
-    if not susp:
-        return SELECT_SUSPENSION
-    context.user_data['config']['suspension'] = {'id': sid, **susp}
-    keyboard = [[InlineKeyboardButton(bk['name'], callback_data=f"bodykit_{bk['id']}")] for bk in BODYKITS]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_susp")])
-    await query.edit_message_text(
-        f"🔧 <b>{susp['name']}</b>\n{susp['description']}\n"
-        f"Клиренс: {susp['ride_height']} | Развал: {susp['camber']}\n\n🎨 Выберите обвес:",
-        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    return SELECT_BODYKIT
-
-
-async def select_bodykit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    bk_id = query.data.replace("bodykit_", "")
-    bk = next((b for b in BODYKITS if b['id'] == bk_id), None)
-    if not bk:
-        return SELECT_BODYKIT
-    context.user_data['config']['bodykit'] = bk
-    keyboard = []
-    for i in range(0, len(WHEELS), 2):
-        row = [InlineKeyboardButton(WHEELS[i]['name'], callback_data=f"wheel_{WHEELS[i]['id']}")]
-        if i + 1 < len(WHEELS):
-            row.append(InlineKeyboardButton(WHEELS[i+1]['name'], callback_data=f"wheel_{WHEELS[i+1]['id']}"))
-        keyboard.append(row)
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_bodykit")])
-    components = "\n".join([f"• {c}" for c in bk['components']])
-    await query.edit_message_text(
-        f"🎨 <b>{bk['name']}</b>\n{bk['description']}\nСтиль: {bk['style']}\n\n"
-        f"Компоненты:\n{components}\n\n🛞 Выберите диски:",
-        parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-    return SELECT_WHEEL
-
-
-async def select_wheel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    w_id = query.data.replace("wheel_", "")
-    wheel = next((w for w in WHEELS if w['id'] == w_id), None)
-    if not wheel:
-        return SELECT_WHEEL
-    context.user_data['config']['wheels'] = wheel
-    cfg = context.user_data['config']
+async def show_login_form(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Show login form"""
     text = (
-        f"✅ <b>Конфигурация готова!</b>\n\n"
-        f"🚗 {cfg['car']['name']} ({cfg['car']['years']})\n"
-        f"⚙️ {cfg['engine']['name']} — {cfg['engine']['power']}\n"
-        f"🔧 {cfg['suspension']['name']}\n"
-        f"🎨 {cfg['bodykit']['name']}\n"
-        f"🛞 {cfg['wheels']['name']}\n"
+        "🔑 <b>Login</b>\n\n"
+        "Enter your <b>username</b>:"
     )
-    keyboard = [
-        [InlineKeyboardButton("📦 Оформить заказ", callback_data="place_order")],
-        [InlineKeyboardButton("🔄 Начать заново", callback_data="restart_config")],
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")],
-    ]
-    await query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-    return CONFIG_SUMMARY
+    await _edit(update, text, parse_mode='HTML', reply_markup=ForceReply())
+    return AUTH_USERNAME
 
 
-async def config_summary_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    if query.data == "place_order":
-        return await start_orders(update, context)
-    elif query.data == "restart_config":
-        return await start_config(update, context)
-    return CONFIG_SUMMARY
+async def handle_auth_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle username input for login"""
+    username = update.message.text.strip()
+    if not username:
+        await update.message.reply_text("❌ Please enter a valid username.")
+        return AUTH_USERNAME
+
+    context.user_data['auth_temp_username'] = username
+    await update.message.reply_text(
+        "Enter your <b>password</b>:",
+        parse_mode='HTML',
+        reply_markup=ForceReply()
+    )
+    return AUTH_PASSWORD
 
 
-# ==================== Order Flow ====================
+async def handle_auth_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle password input for login"""
+    password = update.message.text.strip()
+    username = context.user_data.get('auth_temp_username', '')
 
-async def start_orders(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    config = context.user_data.get('config', {})
-    user_id = update.effective_user.id
-    all_orders_list = get_all_orders()
-    my_orders = [o for o in all_orders_list if o.get('user_id') == user_id]
+    user = authenticate_user(username, password)
+    if not user:
+        await update.message.reply_text(
+            "❌ <b>Invalid username or password.</b>\n\n"
+            "Try again or register a new account.\n\n"
+            "Enter your <b>username</b>:",
+            parse_mode='HTML',
+            reply_markup=ForceReply()
+        )
+        return AUTH_USERNAME
 
-    if my_orders:
-        text = f"📋 <b>Ваши заказы ({len(my_orders)})</b>\n\n"
-        for o in my_orders[:10]:
-            car = o.get('car', {}).get('name', 'N/A')
-            st = o.get('status', 'new')
-            text += f"{STATUS_EMOJI.get(st, '📋')} <code>{o['id']}</code> — {car}\n"
-            text += f"   Статус: {STATUS_NAMES.get(st, st)} | {o.get('created_at', '')}\n\n"
-    else:
-        text = "📋 <b>У вас пока нет заказов</b>\n\n"
+    # Save to session
+    context.user_data['auth_user'] = {
+        'id': user['id'],
+        'username': user['username'],
+    }
+    context.user_data.pop('auth_temp_username', None)
 
-    if config:
-        keyboard = [
-            [InlineKeyboardButton("📦 Оформить заказ", callback_data="confirm_order")],
-            [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")],
-        ]
-    else:
-        text += "Сначала настройте автомобиль через Конфигуратор."
-        keyboard = [
-            [InlineKeyboardButton("🚗 Конфигуратор", callback_data="menu_config")],
-            [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")],
-        ]
-    await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-    return ORDER_REVIEW
+    await update.message.reply_text(
+        f"✅ <b>Welcome, {user['username']}!</b>\n\n"
+        f"You are now logged in.",
+        parse_mode='HTML'
+    )
+    return await show_main_menu(update, context)
 
 
-async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    cfg = context.user_data.get('config', {})
-    if not cfg:
-        await query.edit_message_text("❌ Нет конфигурации. Настройте автомобиль через Конфигуратор.")
+# ==================== Registration ====================
+
+async def show_register_form(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Show registration form"""
+    text = (
+        "📝 <b>Registration</b>\n\n"
+        "Choose a <b>username</b>:"
+    )
+    await _edit(update, text, parse_mode='HTML', reply_markup=ForceReply())
+    return REG_USERNAME
+
+
+async def handle_reg_username(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle username input for registration"""
+    username = update.message.text.strip()
+    if not username or len(username) < 3:
+        await update.message.reply_text("❌ Username must be at least 3 characters.\n\nEnter your <b>username</b>:", parse_mode='HTML', reply_markup=ForceReply())
+        return REG_USERNAME
+
+    # Check if already exists
+    existing = get_user_by_username(username)
+    if existing:
+        await update.message.reply_text("❌ Username already taken.\n\nEnter a different <b>username</b>:", parse_mode='HTML', reply_markup=ForceReply())
+        return REG_USERNAME
+
+    context.user_data['reg_data'] = {'username': username.lower()}
+    context.user_data['reg_step'] = 'password'
+    await update.message.reply_text(
+        "Choose a <b>password</b> (min 4 characters):",
+        parse_mode='HTML',
+        reply_markup=ForceReply()
+    )
+    return REG_PASSWORD
+
+
+async def handle_reg_password(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle password input for registration"""
+    password = update.message.text.strip()
+    if len(password) < 4:
+        await update.message.reply_text("❌ Password must be at least 4 characters.\n\nEnter your <b>password</b>:", parse_mode='HTML', reply_markup=ForceReply())
+        return REG_PASSWORD
+
+    context.user_data['reg_data']['password'] = password
+    context.user_data['reg_step'] = 'telegram'
+    await update.message.reply_text(
+        "Enter your <b>Telegram username</b> (optional, e.g. @john):\n\n"
+        "Or send /skip to skip.",
+        parse_mode='HTML',
+        reply_markup=ForceReply()
+    )
+    return REG_TELEGRAM
+
+
+async def handle_reg_telegram(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle telegram input for registration"""
+    context.user_data['reg_data']['telegram'] = update.message.text.strip()
+    context.user_data['reg_step'] = 'phone'
+    await update.message.reply_text(
+        "Enter your <b>phone number</b> (optional, e.g. +1234567890):\n\n"
+        "Or send /skip to skip.",
+        parse_mode='HTML',
+        reply_markup=ForceReply()
+    )
+    return REG_PHONE
+
+
+async def handle_reg_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle phone input for registration"""
+    context.user_data['reg_data']['phone'] = update.message.text.strip()
+    context.user_data['reg_step'] = 'email'
+    await update.message.reply_text(
+        "Enter your <b>email</b> (optional):\n\n"
+        "Or send /skip to skip.",
+        parse_mode='HTML',
+        reply_markup=ForceReply()
+    )
+    return REG_EMAIL
+
+
+async def handle_reg_email(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle email input for registration"""
+    context.user_data['reg_data']['email'] = update.message.text.strip()
+    return await complete_registration(update, context)
+
+
+async def handle_reg_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handle skip in registration"""
+    reg_step = context.user_data.get('reg_step', 'telegram')
+
+    if reg_step == 'telegram':
+        context.user_data['reg_data']['telegram'] = ''
+        context.user_data['reg_step'] = 'phone'
+        await update.message.reply_text(
+            "Enter your <b>phone number</b> (optional):\n\nOr send /skip to skip.",
+            parse_mode='HTML',
+            reply_markup=ForceReply()
+        )
+        return REG_PHONE
+    elif reg_step == 'phone':
+        context.user_data['reg_data']['phone'] = ''
+        context.user_data['reg_step'] = 'email'
+        await update.message.reply_text(
+            "Enter your <b>email</b> (optional):\n\nOr send /skip to skip.",
+            parse_mode='HTML',
+            reply_markup=ForceReply()
+        )
+        return REG_EMAIL
+    elif state == REG_EMAIL:
+        context.user_data['reg_data']['email'] = ''
+        return await complete_registration(update, context)
+    return REG_TELEGRAM
+
+
+async def complete_registration(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Complete user registration"""
+    reg_data = context.user_data.get('reg_data', {})
+
+    user = register_user(reg_data)
+    if not user:
+        await update.message.reply_text("❌ Registration failed. Username may already be taken.\n\nTry /start to log in instead.")
+        context.user_data.pop('reg_data', None)
+        return await cmd_start(update, context)
+
+    # Auto-login
+    context.user_data['auth_user'] = {
+        'id': user['id'],
+        'username': user['username'],
+    }
+    context.user_data.pop('reg_data', None)
+
+    await update.message.reply_text(
+        f"✅ <b>Registration successful!</b>\n\n"
+        f"Welcome, <b>{user['username']}</b>!\n"
+        f"Your user ID: <code>{user['id']}</code>\n\n"
+        f"You can now track your orders.",
+        parse_mode='HTML'
+    )
+    return await show_main_menu(update, context)
+
+
+# ==================== My Orders ====================
+
+async def show_my_orders(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Show user's orders"""
+    user = _get_user_from_session(context)
+    if not user:
+        return await _require_auth(update, context)
+
+    from bot.data.storage import get_all_orders
+    all_orders = get_all_orders()
+    my_orders = [o for o in all_orders if o.get('user_id') == user['id']]
+
+    if not my_orders:
+        text = (
+            "📋 <b>You have no orders yet.</b>\n\n"
+            "Use our website to configure and order a car:\n"
+            "🌐 Open the web client to get started."
+        )
+        kb = [[InlineKeyboardButton("⬅️ Back", callback_data="back_to_main")]]
+        await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
         return MAIN_MENU
 
-    order_data = {
-        'user_id': query.from_user.id,
-        'username': query.from_user.username or query.from_user.first_name,
-        'car': cfg.get('car', {}), 'engine': cfg.get('engine', {}),
-        'suspension': cfg.get('suspension', {}), 'bodykit': cfg.get('bodykit', {}),
-        'wheels': cfg.get('wheels', {}), 'notes': '',
-    }
-    saved = save_order(order_data)
-    text = (
-        f"✅ <b>Заказ #{saved['id']} оформлен!</b>\n\n"
-        f"🚗 {cfg['car']['name']} ({cfg['car']['years']})\n"
-        f"⚙️ {cfg['engine']['name']} — {cfg['engine']['power']}\n"
-        f"🔧 {cfg['suspension']['name']}\n"
-        f"🎨 {cfg['bodykit']['name']}\n"
-        f"🛞 {cfg['wheels']['name']}\n\n"
-        f"Статус: 🆕 Новый\n"
-        f"Скоро свяжется менеджер. Спасибо! 🚗"
-    )
-    keyboard = [[InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")]]
-    await query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-    context.user_data.pop('config', None)
-    return ORDER_CONFIRMED
-
-
-# ==================== Admin Flow ====================
-
-async def start_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = "🔐 <b>Вход в панель сервиса</b>\n\nВведите пароль:"
-    await _edit(update, text, parse_mode='HTML')
-    return ADMIN_AUTH
-
-
-async def handle_auth(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    pwd = update.message.text if update.message else ""
-    if pwd == ADMIN_PASSWORD:
-        context.user_data['is_admin'] = True
-        return await show_admin_menu(update)
-    await update.message.reply_text("❌ Неверный пароль. Попробуйте снова:", parse_mode='HTML')
-    return ADMIN_AUTH
-
-
-async def show_admin_menu(update: Update) -> int:
-    stats = get_order_stats()
-    text = (
-        f"🔧 <b>Панель сервиса</b>\n\n"
-        f"📊 Всего: {stats['total']} | 🆕 {stats['new']} | 🔧 {stats['in_progress']} | ✅ {stats['completed']} | ❌ {stats['cancelled']}"
-    )
-    kb = [
-        [InlineKeyboardButton("📋 Все заказы", callback_data="admin_all_orders")],
-        [InlineKeyboardButton("🆕 Новые", callback_data="admin_new_orders")],
-        [InlineKeyboardButton("🔧 В работе", callback_data="admin_progress_orders")],
-        [InlineKeyboardButton("📊 Статистика", callback_data="admin_stats")],
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")],
-    ]
-    await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
-    return ADMIN_MENU
-
-
-async def admin_menu_cb(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    d = query.data
-
-    if d in ("admin_all_orders", "admin_new_orders", "admin_progress_orders"):
-        status = None
-        if d == "admin_new_orders":
-            status = 'new'
-        elif d == "admin_progress_orders":
-            status = 'in_progress'
-        return await show_order_list(update, context, status)
-    elif d == "admin_stats":
-        return await show_admin_stats(update)
-    elif d == "admin_back_menu":
-        return await show_admin_menu(update)
-    elif d == "admin_back_to_list":
-        return await show_order_list(update, context)
-    return ADMIN_MENU
-
-
-async def show_order_list(update: Update, context: ContextTypes.DEFAULT_TYPE, status=None) -> int:
-    orders = get_all_orders(status=status)
-    if not orders:
-        text = "📋 Заказов нет."
-        kb = [[InlineKeyboardButton("⬅️ Назад", callback_data="admin_back_menu"), InlineKeyboardButton("🏠 Меню", callback_data="back_to_main")]]
-        await update.callback_query.edit_message_text(text, reply_markup=InlineKeyboardMarkup(kb))
-        return ADMIN_ORDER_LIST
-
-    text = f"📋 <b>Заказы ({len(orders)})</b>\n\n"
-    for o in orders[:10]:
+    text = f"📋 <b>Your Orders ({len(my_orders)})</b>\n\n"
+    kb = []
+    for o in my_orders[:15]:
         car = o.get('car', {}).get('name', 'N/A')
         st = o.get('status', 'new')
-        text += f"{STATUS_EMOJI.get(st,'📋')} <code>{o['id']}</code> — {car} | {o.get('username','?')} | {o.get('created_at','')}\n"
-    if len(orders) > 10:
-        text += f"\n...и ещё {len(orders) - 10}"
+        text += f"{STATUS_EMOJI.get(st, '📋')} <code>{o['id']}</code> — {car}\n"
+        text += f"   Status: {STATUS_NAMES.get(st, st)}\n"
 
-    kb = []
-    for o in orders[:5]:
-        car = o.get('car', {}).get('name', 'N/A')[:25]
-        kb.append([InlineKeyboardButton(f"{STATUS_EMOJI.get(o.get('status','new'),'')} {o['id']} — {car}", callback_data=f"admin_order_{o['id']}")])
-    kb.append([InlineKeyboardButton("⬅️ Назад", callback_data="admin_back_menu")])
-    kb.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
-    if status:
-        kb.insert(0, [InlineKeyboardButton("📋 Все заказы", callback_data="admin_all_orders")])
+        # Show assigned service
+        claimed_by = o.get('claimed_by')
+        if claimed_by:
+            svc = get_service(claimed_by)
+            if svc:
+                text += f"   Service: {svc['name']}\n"
+        else:
+            text += f"   Service: ⏳ Not assigned yet\n"
 
-    await update.callback_query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
-    return ADMIN_ORDER_LIST
+        text += f"   Date: {o.get('created_at', '')}\n\n"
+
+        kb.append([InlineKeyboardButton(
+            f"{STATUS_EMOJI.get(st, '📋')} {o['id']} — {car[:30]}",
+            callback_data=f"order_{o['id']}"
+        )])
+
+    if len(my_orders) > 15:
+        text += f"...and {len(my_orders) - 15} more\n\n"
+
+    kb.append([InlineKeyboardButton("⬅️ Back", callback_data="back_to_main")])
+
+    await _edit(update, text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
+    return MAIN_MENU
 
 
 async def show_order_detail(update: Update, context: ContextTypes.DEFAULT_TYPE, order_id) -> int:
+    """Show detailed order info"""
+    user = _get_user_from_session(context)
+    if not user:
+        return await _require_auth(update, context)
+
     o = get_order(order_id)
     if not o:
-        await update.callback_query.edit_message_text("❌ Заказ не найден")
-        return ADMIN_ORDER_LIST
+        await update.callback_query.edit_message_text("❌ Order not found.")
+        return MAIN_MENU
+
+    # Verify ownership
+    if o.get('user_id') != user['id']:
+        await update.callback_query.edit_message_text("❌ This order does not belong to you.")
+        return MAIN_MENU
 
     car = o.get('car', {})
     text = (
-        f"📦 <b>Заказ {o['id']}</b> | {STATUS_NAMES.get(o.get('status','new'),'')}\n"
-        f"Создан: {o.get('created_at','')}\n\n"
-        f"👤 {o.get('username','?')} (ID: {o.get('user_id','')})\n\n"
+        f"📦 <b>Order {o['id']}</b> | {STATUS_NAMES.get(o.get('status','new'),'')}\n"
+        f"Created: {o.get('created_at','')}\n\n"
         f"🚗 {car.get('name','N/A')} ({car.get('years','')})\n"
         f"⚙️ {o.get('engine',{}).get('name','N/A')} — {o.get('engine',{}).get('power','')}\n"
         f"🔧 {o.get('suspension',{}).get('name','N/A')}\n"
         f"🎨 {o.get('bodykit',{}).get('name','N/A')}\n"
         f"🛞 {o.get('wheels',{}).get('name','N/A')}\n"
     )
-    if o.get('notes'):
-        text += f"\n📝 {o['notes']}\n"
 
-    kb = []
-    cur = o.get('status', 'new')
-    for ns in ['new', 'in_progress', 'completed', 'cancelled']:
-        if ns != cur:
-            kb.append([InlineKeyboardButton(f"🔄 {STATUS_NAMES[ns]}", callback_data=f"admin_set_status_{o['id']}_{ns}")])
-    kb.append([InlineKeyboardButton("⬅️ Назад", callback_data="admin_back_to_list")])
-    kb.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
+    if o.get('contacts'):
+        text += f"\n📞 Contact: {o['contacts']}\n"
 
-    await update.callback_query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
-    return ADMIN_ORDER_DETAIL
+    # Show assigned service info
+    claimed_by = o.get('claimed_by')
+    if claimed_by:
+        svc = get_service(claimed_by)
+        if svc:
+            text += f"\n🔧 <b>Service:</b> {svc['name']}\n"
+            if svc.get('telegram_username'):
+                text += f"   Telegram: {svc['telegram_username']}\n"
+            if svc.get('phone'):
+                text += f"   Phone: {svc['phone']}\n"
+            if svc.get('specialties'):
+                text += f"   Specialties: {', '.join(svc['specialties'])}\n"
+        text += f"\n📋 Claimed at: {o.get('claimed_at', 'N/A')}\n"
+    else:
+        text += "\n⏳ <b>Service:</b> Not assigned yet. A service will claim your order soon.\n"
 
+    # Status history
+    history = o.get('status_history', [])
+    if history:
+        text += "\n📜 <b>History:</b>\n"
+        for h in history:
+            text += f"  {STATUS_EMOJI.get(h['status'],'📋')} {h['status']} — {h.get('by_name','System')} at {h['at']}\n"
 
-async def handle_order_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    d = query.data
-
-    if d.startswith("admin_order_"):
-        oid = d[len("admin_order_"):]
-        return await show_order_detail(update, context, oid)
-
-    if d.startswith("admin_set_status_"):
-        data = d[len("admin_set_status_"):]
-        parts = data.split('_')
-        oid = parts[0]
-        ns = '_'.join(parts[1:])
-        o = update_order_status(oid, ns)
-        if o:
-            await query.edit_message_text(f"✅ Статус {oid} → {STATUS_NAMES.get(ns, ns)}")
-            return await show_order_detail(update, context, oid)
-        await query.edit_message_text("❌ Заказ не найден")
-        return ADMIN_ORDER_LIST
-
-    return ADMIN_ORDER_DETAIL
-
-
-async def show_admin_stats(update: Update) -> int:
-    stats = get_order_stats()
-    orders = get_all_orders()
-    cc = {}
-    for o in orders:
-        n = o.get('car', {}).get('name', 'N/A')
-        cc[n] = cc.get(n, 0) + 1
-    top = sorted(cc.items(), key=lambda x: x[1], reverse=True)[:5]
-    top_text = "\n".join(f"   {i+1}. {n}: {c}" for i, (n, c) in enumerate(top)) or "   Нет данных"
-    conv = f"({stats['completed']/stats['total']*100:.1f}%)" if stats['total'] > 0 else "(нет заказов)"
-    text = (
-        f"📊 <b>Статистика</b>\n\n"
-        f"Всего: {stats['total']}\n"
-        f"🆕 {stats['new']} | 🔧 {stats['in_progress']} | ✅ {stats['completed']} | ❌ {stats['cancelled']}\n\n"
-        f"<b>Популярные авто:</b>\n{top_text}\n\n"
-        f"<b>Конверсия:</b> {stats['completed']}/{stats['total']} {conv}"
-    )
     kb = [
-        [InlineKeyboardButton("⬅️ Назад", callback_data="admin_back_menu")],
-        [InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")],
+        [InlineKeyboardButton("⬅️ Back to Orders", callback_data="my_orders")],
+        [InlineKeyboardButton("🏠 Main Menu", callback_data="back_to_main")],
     ]
     await update.callback_query.edit_message_text(text, parse_mode='HTML', reply_markup=InlineKeyboardMarkup(kb))
-    return ADMIN_MENU
+    return ORDER_DETAIL
 
 
-# ==================== Back to Main ====================
+# ==================== Entry Point ====================
 
-async def back_to_main_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    query = update.callback_query
-    await query.answer()
-    return await show_main_menu(update)
-
-
-# ==================== Bot Setup ====================
-
-def main():
-    """Start the bot"""
+def build_application():
+    """Build and return the application with handlers"""
     token = os.getenv('BOT_TOKEN')
     if not token:
-        env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')
-        if os.path.exists(env_path):
-            with open(env_path, 'r', encoding='utf-8') as f:
-                for line in f:
-                    line = line.strip()
-                    if line and not line.startswith('#') and '=' in line:
-                        k, v = line.split('=', 1)
-                        if k.strip() == 'BOT_TOKEN':
-                            token = v.strip()
-                            break
-    if not token:
-        logger.error("BOT_TOKEN not found")
-        return
+        raise ValueError("BOT_TOKEN environment variable is not set")
 
     app = ApplicationBuilder().token(token).build()
 
-    # Single ConversationHandler for everything
-    conv = ConversationHandler(
-        entry_points=[CommandHandler("start", cmd_start)],
+    # Main conversation handler
+    conv_handler = ConversationHandler(
+        entry_points=[
+            CommandHandler('start', cmd_start),
+            CommandHandler('cancel', cmd_cancel),
+            CallbackQueryHandler(menu_handler, pattern='^(my_orders|about|back_to_main)$'),
+            CallbackQueryHandler(show_login_form, pattern='^auth_login$'),
+            CallbackQueryHandler(show_register_form, pattern='^auth_register$'),
+            CallbackQueryHandler(lambda u, c: show_order_detail(u, c, u.callback_query.data.replace('order_', '')), pattern='^order_'),
+        ],
         states={
             MAIN_MENU: [
-                CallbackQueryHandler(menu_handler, pattern='^menu_'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+                CallbackQueryHandler(menu_handler, pattern='^(my_orders|about|back_to_main)$'),
+                CallbackQueryHandler(lambda u, c: show_order_detail(u, c, u.callback_query.data.replace('order_', '')), pattern='^order_'),
             ],
-            # Config
-            SELECT_CAR: [
-                CallbackQueryHandler(select_car, pattern='^car_'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            AUTH_USERNAME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_auth_username),
             ],
-            SELECT_ENGINE: [
-                CallbackQueryHandler(select_engine, pattern='^engine_'),
-                CallbackQueryHandler(back_to_config_car, pattern='^back_to_config_car$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            AUTH_PASSWORD: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_auth_password),
             ],
-            SELECT_SUSPENSION: [
-                CallbackQueryHandler(select_suspension, pattern='^susp_'),
-                CallbackQueryHandler(back_to_config_engine, pattern='^back_to_config_engine$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            REG_USERNAME: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reg_username),
             ],
-            SELECT_BODYKIT: [
-                CallbackQueryHandler(select_bodykit, pattern='^bodykit_'),
-                CallbackQueryHandler(back_to_config_susp, pattern='^back_to_config_susp$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            REG_PASSWORD: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reg_password),
             ],
-            SELECT_WHEEL: [
-                CallbackQueryHandler(select_wheel, pattern='^wheel_'),
-                CallbackQueryHandler(back_to_config_bodykit, pattern='^back_to_config_bodykit$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            REG_TELEGRAM: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reg_telegram),
+                CommandHandler("skip", handle_reg_skip),
             ],
-            CONFIG_SUMMARY: [
-                CallbackQueryHandler(config_summary_action, pattern='^(place_order|restart_config)$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            REG_PHONE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reg_phone),
+                CommandHandler("skip", handle_reg_skip),
             ],
-            # Orders
-            ORDER_REVIEW: [
-                CallbackQueryHandler(confirm_order, pattern='^confirm_order$'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            REG_EMAIL: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_reg_email),
+                CommandHandler("skip", handle_reg_skip),
             ],
-            ORDER_CONFIRMED: [
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
-            ],
-            # Admin
-            ADMIN_AUTH: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_auth),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
-            ],
-            ADMIN_MENU: [
-                CallbackQueryHandler(admin_menu_cb, pattern='^admin_(all|new|progress|stats|back)_'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
-            ],
-            ADMIN_ORDER_LIST: [
-                CallbackQueryHandler(handle_order_action, pattern='^admin_order_'),
-                CallbackQueryHandler(admin_menu_cb, pattern='^admin_(all|new|progress|back)_'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
-            ],
-            ADMIN_ORDER_DETAIL: [
-                CallbackQueryHandler(handle_order_action, pattern='^admin_(order_|set_status_)'),
-                CallbackQueryHandler(admin_menu_cb, pattern='^admin_back_'),
-                CallbackQueryHandler(back_to_main_handler, pattern='^back_to_main$'),
+            ORDER_DETAIL: [
+                CallbackQueryHandler(menu_handler, pattern='^(my_orders|back_to_main)$'),
             ],
         },
-        fallbacks=[],
+        fallbacks=[
+            CommandHandler('start', cmd_start),
+            CommandHandler('cancel', cmd_cancel),
+        ],
     )
-    app.add_handler(conv)
-    app.add_error_handler(lambda u, c: logger.error(f"Error: {c.error}"))
 
-    logger.info("🤖 Bot started!")
-    app.run_polling(drop_pending_updates=True)
+    app.add_handler(conv_handler)
 
-
-# ==================== Back navigation helpers ====================
-
-async def back_to_config_car(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data['config'] = {}
-    keyboard = [[InlineKeyboardButton(f"{c['name']} ({c['years']})", callback_data=f"car_{c['id']}")] for c in CARS]
-    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
-    await update.callback_query.edit_message_text("🚗 Выберите автомобиль:", parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-    return SELECT_CAR
+    return app
 
 
-async def back_to_config_engine(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    car = context.user_data.get('config', {}).get('car')
-    if not car:
-        return await back_to_config_car(update, context)
-    cid = car['id']
-    engines = ENGINES.get(cid, [])
-    keyboard = [[InlineKeyboardButton(e['name'], callback_data=f"engine_{e['id']}")] for e in engines]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_car")])
-    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
-    await update.callback_query.edit_message_text(f"⚙️ Выберите двигатель для {car['name']}:", parse_mode='HTML', reply_markup=InlineKeyboardMarkup(keyboard))
-    return SELECT_ENGINE
-
-
-async def back_to_config_susp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    keyboard = [[InlineKeyboardButton(s['name'], callback_data=f"susp_{sid}")] for sid, s in SUSPENSIONS.items()]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_engine")])
-    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
-    await update.callback_query.edit_message_text("🔧 Выберите подвеску:", reply_markup=InlineKeyboardMarkup(keyboard))
-    return SELECT_SUSPENSION
-
-
-async def back_to_config_bodykit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    keyboard = [[InlineKeyboardButton(bk['name'], callback_data=f"bodykit_{bk['id']}")] for bk in BODYKITS]
-    keyboard.append([InlineKeyboardButton("⬅️ Назад", callback_data="back_to_config_susp")])
-    keyboard.append([InlineKeyboardButton("🏠 Главное меню", callback_data="back_to_main")])
-    await update.callback_query.edit_message_text("🎨 Выберите обвес:", reply_markup=InlineKeyboardMarkup(keyboard))
-    return SELECT_BODYKIT
+def main():
+    """Run the bot"""
+    application = build_application()
+    print("🤖 JDM Client Bot starting...")
+    print("📋 Client order tracking only — login, view orders, see service info")
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == '__main__':

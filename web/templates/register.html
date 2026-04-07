@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="index.title"> JDM Config Web</h1>
+            <p class="subtitle" data-i18n="auth.registerTitle"> Register</p>
+        </header>
+
+        <div class="login-form" style="max-width: 500px;">
+            <h2 data-i18n="auth.registerTitle"> Register</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username"><span class="label-icon"></span> <span data-i18n="auth.username">Username</span> *</label>
+                    <input type="text" id="username" class="input-field" data-i18n="auth.usernamePlaceholder" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><span class="label-icon"></span> <span data-i18n="auth.password">Password</span> *</label>
+                    <input type="password" id="password" class="input-field" data-i18n="auth.passwordPlaceholder" placeholder="Choose a password (min 4 chars)" required>
+                </div>
+                <div class="form-group">
+                    <label for="telegram">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.telegram">Telegram Username</span>
+                    </label>
+                    <input type="text" id="telegram" class="input-field" data-i18n="auth.telegramPlaceholder" placeholder="@your_username">
+                </div>
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.phone">Phone Number</span>
+                    </label>
+                    <input type="tel" id="phone" class="input-field" data-i18n="auth.phonePlaceholder" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="email">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.email">Email Address</span>
+                    </label>
+                    <input type="email" id="email" class="input-field" data-i18n="auth.emailPlaceholder" placeholder="your@email.com">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="auth.registerButton">Register</button>
+                <div id="registerError" class="error-message" style="display: none;"></div>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: var(--text-tertiary);">
+                <span data-i18n="auth.hasAccount">Already have an account?</span> <a href="/login" style="color: var(--accent-secondary);" data-i18n="auth.loginNow">Login here</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const telegram = document.getElementById('telegram').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const errorEl = document.getElementById('registerError');
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, telegram, phone, email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.message || i18n.t('common.error');
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = i18n.t('common.error');
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

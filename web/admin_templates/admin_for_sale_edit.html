@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Car - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .form-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            border: 2px solid var(--border-primary);
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-primary);
+        }
+        .form-section h3 {
+            margin-top: 0;
+            color: var(--text-secondary);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            font-size: 1em;
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .image-upload-area {
+            border: 2px dashed var(--border-primary);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .image-upload-area:hover {
+            border-color: var(--accent-primary);
+        }
+        .image-upload-area.dragover {
+            border-color: var(--accent-primary);
+            background: var(--bg-tertiary);
+        }
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .image-preview-item .adjust-btn {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 2;
+        }
+        .image-preview-item .adjust-btn:hover {
+            background: var(--bg-tertiary);
+            transform: scale(1.1);
+        }
+        .image-preview-item .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .questionnaire-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Modal base styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid var(--border-primary);
+        }
+        .modal-content h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        /* Cropper modal */
+        .modal-cropper {
+            max-width: 900px;
+            width: 95%;
+        }
+        .cropper-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        #cropperCanvas {
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: grab;
+            max-width: 100%;
+            height: auto;
+            background: #1a1a2e;
+        }
+        #cropperCanvas:active {
+            cursor: grabbing;
+        }
+        .cropper-preview-wrap {
+            flex-shrink: 0;
+            text-align: center;
+        }
+        #cropperPreview {
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e94560;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="admin.editCar"> {{ 'Edit' if car else 'Add' }} Car for Sale</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link active" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
+            </nav>
+        </header>
+
+        <div class="form-container">
+            <form id="carForm" onsubmit="saveCar(event)">
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <h3> Basic Information</h3>
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="e.g. Toyota Supra A80 - Drift Spec">
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price</label>
+                        <input type="text" id="price" name="price" placeholder="e.g. $25,000">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" placeholder="Detailed car description, features..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="is_available" name="is_available" checked>
+                            For Sale
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Questionnaire -->
+                <div class="form-section">
+                    <h3> Questionnaire</h3>
+                    <div class="questionnaire-grid">
+                        <div class="form-group">
+                            <label for="q_mileage">Mileage (km)</label>
+                            <input type="text" id="q_mileage" placeholder="e.g. 45,000">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_year">Year</label>
+                            <input type="text" id="q_year" placeholder="e.g. 1998">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_condition">Condition</label>
+                            <select id="q_condition">
+                                <option value="">Select...</option>
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="project">Project</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="q_documents">Documents</label>
+                            <input type="text" id="q_documents" placeholder="Title, registration, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_location">Location</label>
+                            <input type="text" id="q_location" placeholder="City/region">
+                        </div>
+                        <div class="form-group">
+                            <label for="q_contact">Contact</label>
+                            <input type="text" id="q_contact" placeholder="Telegram, phone...">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="q_mods_list">Modifications List</label>
+                        <textarea id="q_mods_list" placeholder="List all installed parts and modifications..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Modifications -->
+                <div class="form-section">
+                    <h3> Modifications</h3>
+                    <div class="form-group">
+                        <label for="engine">Engine</label>
+                        <input type="text" id="engine" name="engine" placeholder="e.g. 2JZ-GTE Single Turbo, 700 hp">
+                    </div>
+                    <div class="form-group">
+                        <label for="suspension">Suspension</label>
+                        <input type="text" id="suspension" name="suspension" placeholder="e.g. BC Racing BR Series, -40mm">
+                    </div>
+                    <div class="form-group">
+                        <label for="bodykit">Body Kit</label>
+                        <input type="text" id="bodykit" name="bodykit" placeholder="e.g. VARIS Geo widebody, carbon hood">
+                    </div>
+                    <div class="form-group">
+                        <label for="wheels">Wheels</label>
+                        <input type="text" id="wheels" name="wheels" placeholder="e.g. Volk TE37 18x9.5 +22">
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <div class="form-section">
+                    <h3> Photos</h3>
+                    <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <p style="font-size: 2em; margin: 0;">📷</p>
+                        <p>Click or drag photos here</p>
+                        <p style="font-size: 0.85em; color: #666;">JPG, PNG, WebP (max 10 photos)</p>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div class="image-preview-grid" id="imagePreviewGrid"></div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <a href="/for-sale" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let carId = {{ car | tojson if car else 'null' }};
+        let currentImages = [];
+        let pendingFiles = [];
+
+        // Load existing car data
+        async function loadCar() {
+            if (!carId) return;
+            const response = await fetch(`/api/for-sale/${carId}`);
+            const car = await response.json();
+
+            document.getElementById('name').value = car.name || '';
+            document.getElementById('price').value = car.price || '';
+            document.getElementById('description').value = car.description || '';
+            document.getElementById('is_available').checked = car.is_available !== false;
+
+            // Set modifications (simple text)
+            document.getElementById('engine').value = (car.engine && car.engine.custom_value) || (car.engine && car.engine.name) || '';
+            document.getElementById('suspension').value = (car.suspension && car.suspension.custom_value) || (car.suspension && car.suspension.name) || '';
+            document.getElementById('bodykit').value = (car.bodykit && car.bodykit.custom_value) || (car.bodykit && car.bodykit.name) || '';
+            document.getElementById('wheels').value = (car.wheels && car.wheels.custom_value) || (car.wheels && car.wheels.name) || '';
+
+            // Set questionnaire
+            const q = car.questionnaire || {};
+            document.getElementById('q_mileage').value = q.mileage || '';
+            document.getElementById('q_year').value = q.year || '';
+            document.getElementById('q_condition').value = q.condition || '';
+            document.getElementById('q_documents').value = q.documents || '';
+            document.getElementById('q_location').value = q.location || '';
+            document.getElementById('q_contact').value = q.contact || '';
+            document.getElementById('q_mods_list').value = q.mods_list || '';
+
+            // Set existing images
+            currentImages = car.images || [];
+            renderImagePreviews();
+        }
+
+        // Image handling
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            addPendingFiles(files);
+        });
+
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            addPendingFiles(files);
+            event.target.value = '';
+        }
+
+        function addPendingFiles(files) {
+            const remaining = 10 - currentImages.length - pendingFiles.length;
+            const toAdd = files.slice(0, remaining);
+            pendingFiles = [...pendingFiles, ...toAdd];
+            renderImagePreviews();
+        }
+
+        function renderImagePreviews() {
+            const grid = document.getElementById('imagePreviewGrid');
+            let html = '';
+
+            currentImages.forEach((img, idx) => {
+                html += `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="">
+                        <button type="button" class="adjust-btn" onclick="adjustExistingImage(${idx})" title="Adjust">✂</button>
+                        <button type="button" class="remove-btn" onclick="removeExistingImage(${idx})">×</button>
+                    </div>
+                `;
+            });
+
+            pendingFiles.forEach((file, idx) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const tempId = `pending-${idx}`;
+                    const el = document.getElementById(tempId);
+                    if (el) el.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                html += `
+                    <div class="image-preview-item">
+                        <img id="pending-${idx}" src="" alt="">
+                        <button type="button" class="adjust-btn" onclick="adjustPendingImage(${idx})" title="Adjust">✂</button>
+                        <button type="button" class="remove-btn" onclick="removePendingImage(${idx})">×</button>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function removeExistingImage(idx) {
+            currentImages.splice(idx, 1);
+            renderImagePreviews();
+        }
+
+        function removePendingImage(idx) {
+            pendingFiles.splice(idx, 1);
+            renderImagePreviews();
+        }
+
+        // Image Cropper
+        let cropperState = {
+            img: null, scale: 1, offsetX: 0, offsetY: 0,
+            isDragging: false, startX: 0, startY: 0,
+            targetIdx: null, isExisting: false,
+        };
+
+        function adjustExistingImage(idx) {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => openCropper(img, idx, true);
+            img.src = currentImages[idx];
+        }
+
+        function adjustPendingImage(idx) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => openCropper(img, idx, false);
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(pendingFiles[idx]);
+        }
+
+        function openCropper(img, idx, isExisting) {
+            cropperState = {
+                img, scale: 1, offsetX: 0, offsetY: 0,
+                isDragging: false, startX: 0, startY: 0,
+                targetIdx: idx, isExisting,
+            };
+            document.getElementById('imageCropperModal').classList.add('show');
+            const canvas = document.getElementById('cropperCanvas');
+            const cw = canvas.width, ch = canvas.height;
+            cropperState.scale = Math.min(cw / img.width, ch / img.height);
+            cropperState.offsetX = (cw - img.width * cropperState.scale) / 2;
+            cropperState.offsetY = (ch - img.height * cropperState.scale) / 2;
+            drawCropper();
+            updatePreview();
+        }
+
+        function drawCropper() {
+            const canvas = document.getElementById('cropperCanvas');
+            const ctx = canvas.getContext('2d');
+            const { img, scale, offsetX, offsetY } = cropperState;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(0, 0, canvas.width, (canvas.height - 400) / 2);
+            ctx.fillRect(0, (canvas.height + 400) / 2, canvas.width, (canvas.height - 400) / 2);
+            ctx.fillRect(0, (canvas.height - 400) / 2, (canvas.width - 600) / 2, 400);
+            ctx.fillRect((canvas.width + 600) / 2, (canvas.height - 400) / 2, (canvas.width - 600) / 2, 400);
+            ctx.strokeStyle = '#e94560';
+            ctx.lineWidth = 2;
+            ctx.strokeRect((canvas.width - 600) / 2, (canvas.height - 400) / 2, 600, 400);
+        }
+
+        function updatePreview() {
+            const canvas = document.getElementById('cropperCanvas');
+            const { img, scale, offsetX, offsetY } = cropperState;
+            const cropX = Math.max(0, ((canvas.width - 600) / 2 - offsetX) / scale);
+            const cropY = Math.max(0, ((canvas.height - 400) / 2 - offsetY) / scale);
+            const cropW = Math.min(img.width, 600 / scale);
+            const cropH = Math.min(img.height, 400 / scale);
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 600;
+            tempCanvas.height = 400;
+            const ctx = tempCanvas.getContext('2d');
+            ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, 600, 400);
+            document.getElementById('cropperPreview').src = tempCanvas.toDataURL('image/jpeg', 0.9);
+        }
+
+        function applyCrop() {
+            try {
+                const canvas = document.getElementById('cropperCanvas');
+                const { img, scale, offsetX, offsetY } = cropperState;
+                if (!img) { alert('No image loaded'); return; }
+                const cropX = Math.max(0, ((canvas.width - 600) / 2 - offsetX) / scale);
+                const cropY = Math.max(0, ((canvas.height - 400) / 2 - offsetY) / scale);
+                const cropW = Math.min(img.width, 600 / scale);
+                const cropH = Math.min(img.height, 400 / scale);
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 1200;
+                tempCanvas.height = 800;
+                const ctx = tempCanvas.getContext('2d');
+                ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, 1200, 800);
+                const croppedDataUrl = tempCanvas.toDataURL('image/jpeg', 0.92);
+                if (cropperState.isExisting) {
+                    currentImages[cropperState.targetIdx] = croppedDataUrl;
+                } else {
+                    const byteString = atob(croppedDataUrl.split(',')[1]);
+                    const mimeString = croppedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+                    pendingFiles[cropperState.targetIdx] = new File([ab], 'cropped.jpg', { type: mimeString });
+                }
+                document.getElementById('imageCropperModal').classList.remove('show');
+                renderImagePreviews();
+            } catch (e) {
+                alert('Crop error: ' + e.message);
+                console.error(e);
+            }
+        }
+
+        function cancelCrop() {
+            document.getElementById('imageCropperModal').classList.remove('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cropperCanvas = document.getElementById('cropperCanvas');
+            if (!cropperCanvas) return;
+            cropperCanvas.addEventListener('mousedown', (e) => {
+                cropperState.isDragging = true;
+                cropperState.startX = e.offsetX - cropperState.offsetX;
+                cropperState.startY = e.offsetY - cropperState.offsetY;
+            });
+            cropperCanvas.addEventListener('mousemove', (e) => {
+                if (!cropperState.isDragging) return;
+                cropperState.offsetX = e.offsetX - cropperState.startX;
+                cropperState.offsetY = e.offsetY - cropperState.startY;
+                drawCropper();
+                updatePreview();
+            });
+            cropperCanvas.addEventListener('mouseup', () => { cropperState.isDragging = false; });
+            cropperCanvas.addEventListener('mouseleave', () => { cropperState.isDragging = false; });
+            cropperCanvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const delta = e.deltaY > 0 ? 0.9 : 1.1;
+                const newScale = Math.max(0.1, Math.min(5, cropperState.scale * delta));
+                const rect = cropperCanvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                cropperState.offsetX = mouseX - (mouseX - cropperState.offsetX) * (newScale / cropperState.scale);
+                cropperState.offsetY = mouseY - (mouseY - cropperState.offsetY) * (newScale / cropperState.scale);
+                cropperState.scale = newScale;
+                drawCropper();
+                updatePreview();
+            });
+        });
+
+        // Save car
+        async function saveCar(event) {
+            event.preventDefault();
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            const carData = {
+                name: document.getElementById('name').value,
+                price: document.getElementById('price').value,
+                description: document.getElementById('description').value,
+                is_available: document.getElementById('is_available').checked,
+                questionnaire: {
+                    mileage: document.getElementById('q_mileage').value,
+                    year: document.getElementById('q_year').value,
+                    condition: document.getElementById('q_condition').value,
+                    documents: document.getElementById('q_documents').value,
+                    location: document.getElementById('q_location').value,
+                    contact: document.getElementById('q_contact').value,
+                    mods_list: document.getElementById('q_mods_list').value,
+                },
+                engine: { id: 'custom', name: document.getElementById('engine').value.trim(), custom_value: document.getElementById('engine').value.trim() },
+                suspension: { id: 'custom', name: document.getElementById('suspension').value.trim(), custom_value: document.getElementById('suspension').value.trim() },
+                bodykit: { id: 'custom', name: document.getElementById('bodykit').value.trim(), custom_value: document.getElementById('bodykit').value.trim() },
+                wheels: { id: 'custom', name: document.getElementById('wheels').value.trim(), custom_value: document.getElementById('wheels').value.trim() },
+                images: currentImages,
+            };
+
+            try {
+                let response;
+                if (carId) {
+                    response = await fetch(`/api/for-sale/${carId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(carData)
+                    });
+                } else {
+                    response = await fetch('/api/for-sale', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(carData)
+                    });
+                }
+
+                if (!response.ok) {
+                    alert('Save error');
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Save';
+                    return;
+                }
+
+                const savedCar = await response.json();
+                carId = savedCar.id;
+
+                if (pendingFiles.length > 0) {
+                    const formData = new FormData();
+                    pendingFiles.forEach(file => formData.append('images', file));
+                    const imgResponse = await fetch(`/api/for-sale/${carId}/images`, { method: 'POST', body: formData });
+                    if (imgResponse.ok) {
+                        const imgData = await imgResponse.json();
+                        currentImages = [...currentImages, ...imgData.images];
+                    }
+                }
+
+                alert('Saved!');
+                window.location.href = '/for-sale';
+            } catch (error) {
+                alert('Error: ' + error.message);
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save';
+            }
+        }
+
+        // Initialize
+        loadCar();
+    </script>
+
+    <!-- Image Cropper Modal -->
+    <div id="imageCropperModal" class="modal">
+        <div class="modal-content modal-cropper">
+            <h2>✂ Adjust Photo</h2>
+            <p style="color:#666; font-size:0.9em; margin-bottom:15px;">Drag to reposition • Scroll to zoom</p>
+            <div class="cropper-container">
+                <canvas id="cropperCanvas" width="800" height="533"></canvas>
+                <div class="cropper-preview-wrap">
+                    <p style="font-size:0.85em; color:#666; margin-bottom:5px;">Preview (3:2):</p>
+                    <img id="cropperPreview" alt="Preview">
+                </div>
+            </div>
+            <div style="display:flex; gap:12px; justify-content:center; margin-top:15px;">
+                <button class="btn btn-secondary" onclick="cancelCrop()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyCrop()">Apply</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+</body>
+</html>

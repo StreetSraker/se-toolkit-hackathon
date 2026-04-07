@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Sales - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .for-sale-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .for-sale-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            border: 2px solid var(--border-primary);
+            transition: transform 0.2s;
+        }
+        .for-sale-card:hover {
+            transform: translateY(-4px);
+        }
+        .for-sale-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .for-sale-card h3 {
+            margin: 0 0 8px 0;
+            color: var(--text-secondary);
+        }
+        .for-sale-card .price {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin: 8px 0;
+        }
+        .for-sale-card .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-available {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-success);
+        }
+        .status-sold {
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--accent-danger);
+        }
+        .for-sale-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.9em;
+        }
+        .image-gallery {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        .image-gallery img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="admin.carSales"> Pre-Modified Car Sales</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link active" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
+            </nav>
+        </header>
+
+        <div style="margin: 20px 0;">
+            <a href="/for-sale/new" class="btn btn-primary" data-i18n="admin.addCar">+ Add Car</a>
+        </div>
+
+        <div id="forSaleList" class="for-sale-grid">
+            <p class="loading">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadForSaleCars() {
+            try {
+                const response = await fetch('/api/for-sale');
+                if (!response.ok) {
+                    window.location.href = '/';
+                    return;
+                }
+                const cars = await response.json();
+                renderCars(cars);
+            } catch (error) {
+                console.error('Error loading cars:', error);
+                document.getElementById('forSaleList').innerHTML = '<p class="error">Loading error</p>';
+            }
+        }
+
+        function renderCars(cars) {
+            const container = document.getElementById('forSaleList');
+            if (cars.length === 0) {
+                container.innerHTML = '<p>No cars available for sale. Click "+ Add Car" to list your first car.</p>';
+                return;
+            }
+
+            container.innerHTML = cars.map(car => {
+                return `
+                <div class="for-sale-card">
+                    ${car.images && car.images.length > 0
+                        ? `<img src="${car.images[0]}" alt="${car.name}">`
+                        : `<div style="width:100%;height:200px;background:linear-gradient(135deg,#64748b 0%,#475569 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:3em;"></div>`
+                    }
+                    <h3>${car.name}</h3>
+                    <div class="price">${car.price || 'Negotiable'}</div>
+                    <p style="color:#666;font-size:0.9em;">${car.description ? car.description.substring(0, 100) + '...' : 'No description'}</p>
+                    <span class="status-badge ${car.is_available ? 'status-available' : 'status-sold'}">
+                        ${car.is_available ? ' For Sale' : ' Sold'}
+                    </span>
+                    ${car.images && car.images.length > 0
+                        ? `<div class="image-gallery">${car.images.map(img => `<img src="${img}" alt="">`).join('')}</div>`
+                        : ''
+                    }
+                    <div class="for-sale-actions">
+                        <a href="/for-sale/${car.id}" class="btn btn-primary btn-small">Edit</a>
+                        <button class="btn btn-secondary btn-small" onclick="toggleAvailability('${car.id}', ${!car.is_available})">
+                            ${car.is_available ? 'Mark as sold' : 'Mark as available'}
+                        </button>
+                        <button class="btn btn-secondary btn-small" style="background:#b91c1c;" onclick="deleteCar('${car.id}')">Delete</button>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function toggleAvailability(carId, available) {
+            if (!confirm(`Mark car as ${available ? 'available' : 'sold'}?`)) return;
+            
+            try {
+                const response = await fetch(`/api/for-sale/${carId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({is_available: available})
+                });
+                if (response.ok) {
+                    loadForSaleCars();
+                }
+            } catch (error) {
+                alert('Update error');
+            }
+        }
+
+        async function deleteCar(carId) {
+            if (!confirm('Delete this car? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`/api/for-sale/${carId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    loadForSaleCars();
+                } else {
+                    alert('Delete error');
+                }
+            } catch (error) {
+                alert('Delete error');
+            }
+        }
+
+        // Load on page load
+        loadForSaleCars();
+    </script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+</body>
+</html>

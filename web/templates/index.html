@@ -1,35 +1,51 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JDM Config Web - Настройка автомобилей 90-х и 00-х</title>
+    <title>JDM Config Web - 90s and 00s Car Customization</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🏎️ JDM Config Web</h1>
-            <p class="subtitle">Сервис для заказа автомобилей из 90-х и 00-х с индивидуальной настройкой</p>
+            <h1 data-i18n="index.title"> JDM Config Web</h1>
+            <p class="subtitle" data-i18n="index.subtitle">Service for ordering 90s and 00s cars with custom customization</p>
+            <div id="userBar" style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 15px;">
+                <span id="userGreeting" style="color: var(--text-tertiary);"></span>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small" style="display: none;" data-i18n="common.logout">Logout</button>
+            </div>
         </header>
 
         <nav class="main-menu">
             <a href="/configurator" class="menu-card">
-                <div class="menu-icon">🚗</div>
-                <h2>Конфигуратор</h2>
-                <p>Настройте автомобиль по своему вкусу</p>
+                <div class="menu-icon"></div>
+                <h2 data-i18n="index.configurator">Configurator</h2>
+                <p data-i18n="index.configuratorDesc">Customize your car to your taste</p>
+            </a>
+
+            <a href="/marketplace" class="menu-card">
+                <div class="menu-icon"></div>
+                <h2 data-i18n="index.marketplace">Marketplace</h2>
+                <p data-i18n="index.marketplaceDesc">Ready-made pre-modified cars</p>
             </a>
 
             <a href="/orders" class="menu-card">
-                <div class="menu-icon">📋</div>
-                <h2>Мои заказы</h2>
-                <p>Просмотр статуса ваших заказов</p>
+                <div class="menu-icon"></div>
+                <h2 data-i18n="index.myOrders">My Orders</h2>
+                <p data-i18n="index.myOrdersDesc">View the status of your orders</p>
+            </a>
+
+            <a href="/profile" class="menu-card">
+                <div class="menu-icon"></div>
+                <h2 data-i18n="index.profile">Profile</h2>
+                <p data-i18n="index.profileDesc">Edit your profile and contacts</p>
             </a>
 
             <div class="menu-card about-card" onclick="showAbout()">
-                <div class="menu-icon">ℹ️</div>
-                <h2>О сервисе</h2>
-                <p>Узнайте больше о нас</p>
+                <div class="menu-icon"></div>
+                <h2 data-i18n="index.about">About</h2>
+                <p data-i18n="index.aboutDesc">Learn more about us</p>
             </div>
         </nav>
 
@@ -37,20 +53,40 @@
         <div id="aboutModal" class="modal">
             <div class="modal-content">
                 <span class="modal-close" onclick="closeAbout()">&times;</span>
-                <h2>ℹ️ О сервисе</h2>
-                <p>Мы помогаем заказать автомобили из 90-х и 00-х с индивидуальной настройкой:</p>
-                <ul>
-                    <li>Подбор двигателя и тюнинга</li>
-                    <li>Настройка подвески</li>
-                    <li>Установка обвесов</li>
-                    <li>Подбор колёсных дисков</li>
-                </ul>
-                <p>Все работы выполняются профессиональными мастерами с опытом работы с JDM автомобилями.</p>
-                <p class="contact-info">📞 Для связи с менеджером: <a href="mailto:manager@example.com">manager@example.com</a></p>
+                <h2 data-i18n="index.aboutTitle"> About</h2>
+                <p class="contact-info"><span data-i18n="index.support"> Support</span>: <a href="mailto:kim842058@gmail.com">kim842058@gmail.com</a></p>
             </div>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Check auth status on page load
+        async function checkAuth() {
+            try {
+                const response = await fetch('/api/auth/check');
+                const data = await response.json();
+
+                if (data.is_authenticated) {
+                    document.getElementById('userGreeting').textContent = i18n.t('index.welcome') + ', ' + data.username;
+                    document.querySelector('#userBar .btn').style.display = 'inline-block';
+                }
+            } catch (error) {
+                console.error('Error checking auth:', error);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
+        checkAuth();
+    </script>
 </body>
 </html>

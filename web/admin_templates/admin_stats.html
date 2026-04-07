@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика - Панель сервиса JDM</title>
+    <title>Statistics - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>📊 Статистика заказов</h1>
+            <h1 data-i18n="admin.statsTitle"> Order Statistics</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link">Дашборд</a>
-                <a href="/orders" class="nav-link">Заказы</a>
-                <a href="/stats" class="nav-link active">Статистика</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link active" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
             </nav>
         </header>
 
         <div id="statsDashboard" class="stats-dashboard">
-            <p class="loading">Загрузка статистики...</p>
+            <p class="loading" data-i18n="common.loading">Loading statistics...</p>
         </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/admin_stats.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
 </body>
 </html>

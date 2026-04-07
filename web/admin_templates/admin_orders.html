@@ -1,35 +1,45 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Заказы - Панель сервиса JDM</title>
+    <title>Orders - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>📋 Управление заказами</h1>
+            <h1 data-i18n="admin.orders"> Order Management</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link">Дашборд</a>
-                <a href="/orders" class="nav-link active">Заказы</a>
-                <a href="/stats" class="nav-link">Статистика</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Выйти</button>
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link active" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
             </nav>
         </header>
 
+        <!-- Service Info Banner -->
+        <div id="serviceInfo" class="service-info-banner" style="display: none;">
+            <span class="service-info-icon"></span>
+            <span class="service-info-text" data-i18n="admin.loggedInAs">Logged in as: <strong id="serviceName"></strong></span>
+        </div>
+
         <!-- Filter Buttons -->
         <div class="filter-buttons">
-            <button class="btn btn-filter active" onclick="filterOrders('all')">Все заказы</button>
-            <button class="btn btn-filter" onclick="filterOrders('new')">🆕 Новые</button>
-            <button class="btn btn-filter" onclick="filterOrders('in_progress')">🔧 В работе</button>
-            <button class="btn btn-filter" onclick="filterOrders('completed')">✅ Выполнены</button>
-            <button class="btn btn-filter" onclick="filterOrders('cancelled')">❌ Отменены</button>
+            <button class="btn btn-filter active" onclick="filterOrders('all')" data-i18n="admin.allOrders">All Orders</button>
+            <button class="btn btn-filter" onclick="filterOrders('new')" data-i18n="admin.newOrders"> New</button>
+            <button class="btn btn-filter" onclick="filterOrders('in_progress')" data-i18n="admin.inProgress"> In Progress</button>
+            <button class="btn btn-filter" onclick="filterOrders('completed')" data-i18n="admin.completed"> Completed</button>
+            <button class="btn btn-filter" onclick="filterOrders('cancelled')" data-i18n="admin.cancelled"> Cancelled</button>
+            <button class="btn btn-filter" id="myOrdersBtn" onclick="filterOrders('my')" style="display: none;" data-i18n="admin.myOrders"> My Orders</button>
         </div>
 
         <!-- Orders List -->
         <div id="adminOrdersList" class="admin-orders-list">
-            <p class="loading">Загрузка заказов...</p>
+            <p class="loading" data-i18n="common.loading">Loading orders...</p>
         </div>
     </div>
 
@@ -42,5 +52,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/admin_orders.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
 </body>
 </html>
