@@ -1,0 +1,90 @@
+[
+  {
+    "id": "SALE-0001",
+    "name": "Forward Racing S15",
+    "base_car_id": "",
+    "description": "Takayama Forward Auto",
+    "price": "65.000 $",
+    "questionnaire": {
+      "mileage": "250.000",
+      "year": "2002",
+      "condition": "good",
+      "documents": "- - -",
+      "location": "Krasnoyarsk",
+      "contact": "+x (xxx) xxx-xx-xx",
+      "mods_list": "Carbon fiber body\n2JZ-GTE Single Turbo"
+    },
+    "engine": {
+      "id": "custom",
+      "name": "2JZ-GTE Single Turbo",
+      "custom_value": "2JZ-GTE Single Turbo"
+    },
+    "suspension": {
+      "id": "custom",
+      "name": "Drift-spec",
+      "custom_value": "Drift-spec"
+    },
+    "bodykit": {
+      "id": "custom",
+      "name": "Forward Auto",
+      "custom_value": "Forward Auto"
+    },
+    "wheels": {
+      "id": "custom",
+      "name": "Forward Auto",
+      "custom_value": "Forward Auto"
+    },
+    "images": [
+      "/for-sale-images/car_SALE-0001_img0.jpg",
+      "/for-sale-images/car_SALE-0001_img1.jpg"
+    ],
+    "is_available": true,
+    "created_by_service_id": "SVC-0001",
+    "created_at": "2026-04-07 16:39:03",
+    "updated_at": "2026-04-07 16:39:03"
+  },
+  {
+    "id": "SALE-0002",
+    "name": "Mazda RX-7 Veilside Fortune",
+    "base_car_id": "",
+    "description": "Featured in F&F Tokyo Drift",
+    "price": "87.000 $",
+    "questionnaire": {
+      "mileage": "245.000",
+      "year": "2001",
+      "condition": "good",
+      "documents": "- - -",
+      "location": "Edinburgh",
+      "contact": "@BigCustoms",
+      "mods_list": "Custom widebody kit by Veilside"
+    },
+    "engine": {
+      "id": "custom",
+      "name": "RE13B",
+      "custom_value": "RE13B"
+    },
+    "suspension": {
+      "id": "custom",
+      "name": "Street-spec",
+      "custom_value": "Street-spec"
+    },
+    "bodykit": {
+      "id": "custom",
+      "name": "Veilside Fortune",
+      "custom_value": "Veilside Fortune"
+    },
+    "wheels": {
+      "id": "custom",
+      "name": "Veilside",
+      "custom_value": "Veilside"
+    },
+    "images": [
+      "/for-sale-images/car_SALE-0002_img0.jpg",
+      "/for-sale-images/car_SALE-0002_img1.jpg"
+    ],
+    "is_available": true,
+    "created_by_service_id": "SVC-0002",
+    "created_at": "2026-04-07 16:54:10",
+    "updated_at": "2026-04-07 16:54:36"
+  }
+]

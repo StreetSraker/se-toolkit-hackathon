@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="index.title"> JDM Config Web</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/configurator" class="nav-link">Configurator</a>
+                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/marketplace" class="nav-link">Marketplace</a>
+                <a href="/profile" class="nav-link active" data-i18n="profile.title">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
+            </nav>
+        </header>
+
+        <div class="login-form" style="max-width: 500px;">
+            <h2 data-i18n="profile.title"> My Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="username" data-i18n="profile.username">Username *</label>
+                    <input type="text" id="username" class="input-field" data-i18n="auth.usernamePlaceholder" placeholder="Your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <span class="label-icon"></span>
+                        <span data-i18n="profile.newPassword">New Password</span>
+                    </label>
+                    <input type="password" id="password" class="input-field" data-i18n="profile.passwordPlaceholder" placeholder="Leave blank to keep current">
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;" data-i18n="profile.passwordHint">Minimum 4 characters. Leave blank to keep current password.</small>
+                </div>
+                <div class="form-group">
+                    <label for="telegram">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.telegram">Telegram Username</span>
+                    </label>
+                    <input type="text" id="telegram" class="input-field" data-i18n="auth.telegramPlaceholder" placeholder="@your_username">
+                </div>
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.phone">Phone Number</span>
+                    </label>
+                    <input type="tel" id="phone" class="input-field" data-i18n="auth.phonePlaceholder" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="email">
+                        <span class="label-icon"></span>
+                        <span data-i18n="auth.email">Email Address</span>
+                    </label>
+                    <input type="email" id="email" class="input-field" data-i18n="auth.emailPlaceholder" placeholder="your@email.com">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="profile.saveChanges">Save Changes</button>
+                <div id="profileSuccess" class="success-message" style="display: none;"></div>
+                <div id="profileError" class="error-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .success-message {
+            color: var(--accent-success);
+            background: rgba(76, 175, 80, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .error-message {
+            color: var(--accent-danger);
+            background: rgba(244, 67, 54, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+        }
+    </style>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProfile();
+        });
+
+        async function loadProfile() {
+            try {
+                // First check auth
+                const authResp = await fetch('/api/auth/check');
+                const authData = await authResp.json();
+                if (!authData.is_authenticated) {
+                    document.getElementById('profileError').textContent = ' ' + i18n.t('profile.loginRequired');
+                    document.getElementById('profileError').style.display = 'block';
+                    return;
+                }
+
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('username').value = currentUser.username || '';
+                    document.getElementById('telegram').value = currentUser.telegram || '';
+                    document.getElementById('phone').value = currentUser.phone || '';
+                    document.getElementById('email').value = currentUser.email || '';
+                } else {
+                    const err = await response.json();
+                    document.getElementById('profileError').textContent = ' ' + (err.error || i18n.t('profile.loadError'));
+                    document.getElementById('profileError').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                document.getElementById('profileError').textContent = ' ' + i18n.t('profile.connectionError');
+                document.getElementById('profileError').style.display = 'block';
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const telegram = document.getElementById('telegram').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            const errorEl = document.getElementById('profileError');
+            const successEl = document.getElementById('profileSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            const updateData = {
+                username,
+                telegram,
+                phone,
+                email
+            };
+
+            if (password) {
+                if (password.length < 4) {
+                    errorEl.textContent = ' ' + i18n.t('profile.passwordMinLength');
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                updateData.password = password;
+            }
+
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successEl.textContent = ' ' + i18n.t('profile.profileUpdated');
+                    successEl.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    // Reload profile to get updated data
+                    await loadProfile();
+                } else {
+                    errorEl.textContent = ' ' + (data.error || i18n.t('profile.updateError'));
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = ' ' + i18n.t('profile.connectionError');
+                errorEl.style.display = 'block';
+            }
+        });
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+</html>

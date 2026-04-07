@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - JDM Service Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="admin.title"> Service Panel</h1>
+            <nav class="admin-nav">
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link active" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
+            </nav>
+        </header>
+
+        <div class="login-form" style="max-width: 500px;">
+            <h2 data-i18n="admin.myProfile"> My Service Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="name" data-i18n="admin.serviceDisplayName">Service Display Name *</label>
+                    <input type="text" id="name" class="input-field" data-i18n-placeholder="admin.serviceNamePlaceholder" placeholder="e.g. Mike's Garage" required>
+                </div>
+                <div class="form-group">
+                    <label for="username" data-i18n="common.username">Username</label>
+                    <input type="text" id="username" class="input-field" disabled style="background: var(--bg-tertiary); cursor: not-allowed;">
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;" data-i18n="admin.usernameCannotChange">Username cannot be changed.</small>
+                </div>
+                <div class="form-group">
+                    <label for="password">
+                        <span class="label-icon"></span>
+                        <span data-i18n="admin.newPassword">New Password</span>
+                    </label>
+                    <input type="password" id="password" class="input-field" data-i18n-placeholder="admin.leaveBlank" placeholder="Leave blank to keep current">
+                    <small style="color: var(--text-muted); display: block; margin-top: 4px;" data-i18n="admin.passwordHint">Minimum 4 characters. Leave blank to keep current password.</small>
+                </div>
+                <div class="form-group">
+                    <label for="telegram_username">
+                        <span class="label-icon"></span>
+                        <span data-i18n="admin.telegramUsername">Telegram Username</span>
+                    </label>
+                    <input type="text" id="telegram_username" class="input-field" data-i18n-placeholder="admin.telegramPlaceholder" placeholder="@your_username">
+                </div>
+                <div class="form-group">
+                    <label for="phone">
+                        <span class="label-icon"></span>
+                        <span data-i18n="admin.phoneNumber">Phone Number</span>
+                    </label>
+                    <input type="tel" id="phone" class="input-field" data-i18n-placeholder="admin.phonePlaceholder" placeholder="+1234567890">
+                </div>
+                <div class="form-group">
+                    <label for="specialties">
+                        <span class="label-icon"></span>
+                        <span data-i18n="admin.specialties">Specialties (comma-separated)</span>
+                    </label>
+                    <input type="text" id="specialties" class="input-field" data-i18n-placeholder="admin.specialtiesPlaceholder" placeholder="engine, suspension, bodykit">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="common.save">Save Changes</button>
+                <div id="profileSuccess" class="success-message" style="display: none;"></div>
+                <div id="profileError" class="error-message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .success-message {
+            color: var(--accent-success);
+            background: rgba(76, 175, 80, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+        .error-message {
+            color: var(--accent-danger);
+            background: rgba(244, 67, 54, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 12px;
+            text-align: center;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+    </style>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        let currentService = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadProfile();
+        });
+
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/service/profile');
+                if (response.ok) {
+                    currentService = await response.json();
+                    document.getElementById('name').value = currentService.name || '';
+                    document.getElementById('username').value = currentService.username || '';
+                    document.getElementById('telegram_username').value = currentService.telegram_username || '';
+                    document.getElementById('phone').value = currentService.phone || '';
+                    // Convert specialties array to comma-separated string
+                    const specialties = currentService.specialties || [];
+                    document.getElementById('specialties').value = Array.isArray(specialties) ? specialties.join(', ') : specialties;
+                } else {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const password = document.getElementById('password').value;
+            const telegramUsername = document.getElementById('telegram_username').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const specialtiesStr = document.getElementById('specialties').value.trim();
+
+            const errorEl = document.getElementById('profileError');
+            const successEl = document.getElementById('profileSuccess');
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (!name) {
+                errorEl.textContent = ' Display name is required';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const updateData = {
+                name,
+                telegram_username: telegramUsername,
+                phone,
+            };
+
+            // Convert specialties string to array
+            if (specialtiesStr) {
+                updateData.specialties = specialtiesStr.split(',').map(s => s.trim()).filter(s => s);
+            } else {
+                updateData.specialties = [];
+            }
+
+            if (password) {
+                if (password.length < 4) {
+                    errorEl.textContent = ' Password must be at least 4 characters';
+                    errorEl.style.display = 'block';
+                    return;
+                }
+                updateData.password = password;
+            }
+
+            try {
+                const response = await fetch('/api/service/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successEl.textContent = ' Profile updated successfully!';
+                    successEl.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    // Reload profile to get updated data
+                    await loadProfile();
+                } else {
+                    errorEl.textContent = ' ' + (data.error || 'Failed to update profile');
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = ' Connection error. Please try again.';
+                errorEl.style.display = 'block';
+            }
+        });
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+</body>
+</html>

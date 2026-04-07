@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - JDM Config Web</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 data-i18n="index.title">JDM Config Web</h1>
+            <p class="subtitle" data-i18n="auth.loginTitle">Login</p>
+        </header>
+
+        <div class="login-form">
+            <h2 data-i18n="auth.loginTitle">Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username" data-i18n="auth.username">Username</label>
+                    <input type="text" id="username" class="input-field" data-i18n="auth.usernamePlaceholder" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" data-i18n="auth.password">Password</label>
+                    <input type="password" id="password" class="input-field" data-i18n="auth.passwordPlaceholder" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" data-i18n="auth.loginButton">Login</button>
+                <div id="loginError" class="error-message" style="display: none;"></div>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: var(--text-tertiary);">
+                <span data-i18n="auth.noAccount">Don't have an account?</span> <a href="/register" style="color: var(--accent-secondary);" data-i18n="auth.registerNow">Register here</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    errorEl.textContent = data.message || i18n.t('common.error');
+                    errorEl.style.display = 'block';
+                }
+            } catch (error) {
+                errorEl.textContent = i18n.t('common.error');
+                errorEl.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -9,88 +9,110 @@
 <body>
     <div class="container">
         <header class="header">
-            <a href="/" class="back-link">← Back</a>
-            <h1>🚗 Car Configurator</h1>
+            <h1 data-i18n="configurator.title"> Car Configurator</h1>
+            <nav class="main-nav">
+                <a href="/" class="nav-link" data-i18n="configurator.home">Home</a>
+                <a href="/configurator" class="nav-link active" data-i18n="configurator.configurator">Configurator</a>
+                <a href="/marketplace" class="nav-link" data-i18n="index.marketplace">Marketplace</a>
+                <a href="/orders" class="nav-link" data-i18n="index.myOrders">Orders</a>
+                <a href="/profile" class="nav-link" data-i18n="index.profile">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small" data-i18n="common.logout">Logout</button>
+            </nav>
         </header>
 
         <!-- Progress Bar -->
         <div class="progress-bar">
             <div class="progress-step active" data-step="1">
                 <div class="step-number">1</div>
-                <div class="step-label">Car</div>
+                <div class="step-label" data-i18n="configurator.car">Car</div>
             </div>
             <div class="progress-step" data-step="2">
                 <div class="step-number">2</div>
-                <div class="step-label">Engine</div>
+                <div class="step-label" data-i18n="configurator.engine">Engine</div>
             </div>
             <div class="progress-step" data-step="3">
                 <div class="step-number">3</div>
-                <div class="step-label">Suspension</div>
+                <div class="step-label" data-i18n="configurator.suspension">Suspension</div>
             </div>
             <div class="progress-step" data-step="4">
                 <div class="step-number">4</div>
-                <div class="step-label">Body Kit</div>
+                <div class="step-label" data-i18n="configurator.bodykit">Body Kit</div>
             </div>
             <div class="progress-step" data-step="5">
                 <div class="step-number">5</div>
-                <div class="step-label">Wheels</div>
+                <div class="step-label" data-i18n="configurator.wheels">Wheels</div>
             </div>
             <div class="progress-step" data-step="6">
                 <div class="step-number">6</div>
-                <div class="step-label">Done</div>
+                <div class="step-label" data-i18n="configurator.summary">Summary</div>
             </div>
         </div>
 
         <!-- Step 1: Car Selection -->
         <div class="config-step-content" id="step1">
-            <h2>Select a Car</h2>
+            <h2 data-i18n="configurator.selectCar">Select a Car</h2>
             <div class="options-grid options-grid-cars" id="carOptions"></div>
         </div>
 
         <!-- Step 2: Engine Selection -->
         <div class="config-step-content hidden" id="step2">
-            <h2>Select an Engine</h2>
+            <h2 data-i18n="configurator.selectEngine">Select an Engine</h2>
             <div id="selectedCarInfo" class="info-box"></div>
             <div class="options-grid" id="engineOptions"></div>
         </div>
 
         <!-- Step 3: Suspension Selection -->
         <div class="config-step-content hidden" id="step3">
-            <h2>Select Suspension</h2>
+            <h2 data-i18n="configurator.selectSuspension">Select Suspension</h2>
             <div id="selectedEngineInfo" class="info-box"></div>
             <div class="options-grid" id="suspensionOptions"></div>
         </div>
 
         <!-- Step 4: Bodykit Selection -->
         <div class="config-step-content hidden" id="step4">
-            <h2>Select Body Kit</h2>
+            <h2 data-i18n="configurator.selectBodykit">Select Body Kit</h2>
             <div id="selectedSuspensionInfo" class="info-box"></div>
             <div class="options-grid" id="bodykitOptions"></div>
         </div>
 
         <!-- Step 5: Wheel Selection -->
         <div class="config-step-content hidden" id="step5">
-            <h2>Select Wheels</h2>
+            <h2 data-i18n="configurator.selectWheels">Select Wheels</h2>
             <div id="selectedBodykitInfo" class="info-box"></div>
             <div class="options-grid" id="wheelOptions"></div>
         </div>
 
         <!-- Step 6: Summary -->
         <div class="config-step-content hidden" id="step6">
-            <h2>✅ Configuration Complete!</h2>
+            <h2 data-i18n="configurator.reviewOrder"> Configuration Complete!</h2>
             <div id="configSummary" class="summary-box"></div>
+            <div id="profileContacts" class="summary-box" style="margin-top: 15px; border-color: var(--accent-secondary);"></div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="submitOrder()">📦 Place Order</button>
-                <button class="btn btn-secondary" onclick="restartConfig()">🔄 Start Over</button>
+                <button class="btn btn-primary" onclick="submitOrder()" data-i18n="configurator.submitOrder"> Place Order</button>
+                <button class="btn btn-secondary" onclick="restartConfig()" data-i18n="configurator.startOver">🔄 Start Over</button>
             </div>
         </div>
 
         <!-- Navigation Buttons -->
         <div class="navigation-buttons" id="navButtons">
-            <button class="btn btn-secondary hidden" id="prevBtn" onclick="prevStep()">← Back</button>
+            <button class="btn btn-secondary hidden" id="prevBtn" onclick="prevStep()" data-i18n="configurator.previous">← Back</button>
         </div>
     </div>
 
+    <!-- Custom Input Modal -->
+    <div id="customInputModal" class="modal">
+        <div class="modal-content modal-custom-input">
+            <h2 id="customInputTitle"></h2>
+            <p id="customInputDescription" style="white-space: pre-line; color: var(--text-muted); margin-bottom: 20px;"></p>
+            <input type="text" id="customInputField" class="custom-input-field" data-i18n="configurator.typeHere" placeholder="Type here..." autocomplete="off">
+            <div class="custom-input-buttons">
+                <button class="btn btn-secondary" id="customInputCancel" data-i18n="common.cancel">Cancel</button>
+                <button class="btn btn-primary" id="customInputConfirm" data-i18n="common.confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/configurator.js') }}"></script>
 </body>
 </html>

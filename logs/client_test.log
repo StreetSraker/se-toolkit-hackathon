@@ -1,0 +1,87 @@
+ * Tip: There are .env files present. Install python-dotenv to use them.
+🚗 JDM Client App starting...
+🌐 Client URL: http://localhost:5000
+🔧 Debug mode: False
+ * Serving Flask app 'client_app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.93.25.206:5000
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [07/Apr/2026 12:52:35] "GET / HTTP/1.1" 200 -
+10.91.49.13 - - [07/Apr/2026 13:51:20] "GET / HTTP/1.1" 200 -
+10.91.49.13 - - [07/Apr/2026 13:51:20] "GET /static/css/style.css HTTP/1.1" 200 -
+10.91.49.13 - - [07/Apr/2026 13:51:20] "GET /static/js/main.js HTTP/1.1" 200 -
+10.91.49.13 - - [07/Apr/2026 13:51:22] "GET /marketplace HTTP/1.1" 200 -
+10.91.49.13 - - [07/Apr/2026 13:51:22] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.91.49.13 - - [07/Apr/2026 13:51:22] "GET /api/marketplace HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:24] "GET / HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:24] "GET /static/css/style.css HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:24] "GET /static/js/main.js HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:26] "GET /marketplace HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:26] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:26:26] "GET /api/marketplace HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:26] "GET /marketplace/SALE-0001 HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:26] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:26:27] "GET /api/marketplace/SALE-0001 HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:30] "GET / HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:30] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:26:30] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:26:30] "GET /configurator HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:30] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/js/configurator.js HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /api/cars HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/rx7.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/skyline.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/supra.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/nsx.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/silvia.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/chaser.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/civic.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/ae86.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/evo.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /static/images/cars/impreza.svg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /api/cars HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:31] "GET /api/engines/supra HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:32] "GET /api/engines/supra HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:32] "GET /api/suspensions HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /api/suspensions HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /api/bodykits HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /static/images/bodykits/Rocket%20Bunny.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /static/images/bodykits/Stock.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /static/images/bodykits/Varis.jpg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /static/images/bodykits/Origin%20Labo.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:37] "GET /static/images/bodykits/Pandem.jpg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:39] "GET /api/bodykits HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:39] "GET /api/wheels HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/Stock.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/Rays%20Volk%20Racing%20TE37.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/SSR%20Professor%20SP1.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/Work%20Emotion%20CR%20Kai.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/WedsSport%20TC-105X.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/ADVAN%20Racing%20GT.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/Enkei%20RPF1.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/BBS%20RS-GT.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/OZ%20Superleggera.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/WORK%20CR%20Kai%203-Piece.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/RAYS%20Volk%20Racing%20G25.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:40] "GET /static/images/wheels/RAYS%20Volk%20Racing%20CE28N.png HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:26:49] "GET /api/wheels HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:27] "[35m[1mPOST /api/orders HTTP/1.1[0m" 201 -
+10.246.1.45 - - [07/Apr/2026 16:39:28] "GET /orders HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:28] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:28] "GET /static/js/orders.js HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:28] "GET /api/orders HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:35] "GET / HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:35] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:35] "[36mGET /static/js/main.js HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:36] "GET /marketplace HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:36] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:36] "GET /api/marketplace HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:36] "GET /for-sale-images/car_SALE-0001_img0.jpg HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:39] "GET /marketplace/SALE-0001 HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:39] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:39] "GET /api/marketplace/SALE-0001 HTTP/1.1" 200 -
+10.246.1.45 - - [07/Apr/2026 16:39:39] "[36mGET /for-sale-images/car_SALE-0001_img0.jpg HTTP/1.1[0m" 304 -
+10.246.1.45 - - [07/Apr/2026 16:39:39] "GET /for-sale-images/car_SALE-0001_img1.jpg HTTP/1.1" 200 -

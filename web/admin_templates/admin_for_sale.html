@@ -13,10 +13,11 @@
             margin-top: 20px;
         }
         .for-sale-card {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            border: 2px solid var(--border-primary);
             transition: transform 0.2s;
         }
         .for-sale-card:hover {
@@ -31,12 +32,12 @@
         }
         .for-sale-card h3 {
             margin: 0 0 8px 0;
-            color: #1a1a2e;
+            color: var(--text-secondary);
         }
         .for-sale-card .price {
             font-size: 1.5em;
             font-weight: bold;
-            color: #64748b;
+            color: var(--accent-primary);
             margin: 8px 0;
         }
         .for-sale-card .status-badge {
@@ -47,12 +48,12 @@
             font-weight: 600;
         }
         .status-available {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--accent-success);
         }
         .status-sold {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(244, 67, 54, 0.2);
+            color: var(--accent-danger);
         }
         .for-sale-actions {
             display: flex;
@@ -81,18 +82,20 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>🚗 Pre-Modified Car Sales</h1>
+            <h1 data-i18n="admin.carSales"> Pre-Modified Car Sales</h1>
             <nav class="admin-nav">
-                <a href="/dashboard" class="nav-link">Dashboard</a>
-                <a href="/orders" class="nav-link">Orders</a>
-                <a href="/for-sale" class="nav-link active">Car Sales</a>
-                <a href="/stats" class="nav-link">Statistics</a>
-                <button class="btn btn-secondary btn-small" onclick="handleLogout()">Logout</button>
+                <a href="/dashboard" class="nav-link" data-i18n="admin.dashboard">Dashboard</a>
+                <a href="/orders" class="nav-link" data-i18n="admin.orders">Orders</a>
+                <a href="/for-sale" class="nav-link active" data-i18n="admin.carSales">Car Sales</a>
+                <a href="/stats" class="nav-link" data-i18n="admin.statistics">Statistics</a>
+                <a href="/services" class="nav-link" data-i18n="admin.services">Services</a>
+                <a href="/profile" class="nav-link" data-i18n="admin.profile">Profile</a>
+                <button class="btn btn-secondary btn-small" onclick="handleLogout()" data-i18n="common.logout">Logout</button>
             </nav>
         </header>
 
         <div style="margin: 20px 0;">
-            <a href="/for-sale/new" class="btn btn-primary">+ Add Car</a>
+            <a href="/for-sale/new" class="btn btn-primary" data-i18n="admin.addCar">+ Add Car</a>
         </div>
 
         <div id="forSaleList" class="for-sale-grid">
@@ -119,23 +122,24 @@
         function renderCars(cars) {
             const container = document.getElementById('forSaleList');
             if (cars.length === 0) {
-                container.innerHTML = '<p>No cars available for sale</p>';
+                container.innerHTML = '<p>No cars available for sale. Click "+ Add Car" to list your first car.</p>';
                 return;
             }
 
-            container.innerHTML = cars.map(car => `
+            container.innerHTML = cars.map(car => {
+                return `
                 <div class="for-sale-card">
-                    ${car.images && car.images.length > 0 
+                    ${car.images && car.images.length > 0
                         ? `<img src="${car.images[0]}" alt="${car.name}">`
-                        : `<div style="width:100%;height:200px;background:linear-gradient(135deg,#64748b 0%,#475569 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:3em;">🚗</div>`
+                        : `<div style="width:100%;height:200px;background:linear-gradient(135deg,#64748b 0%,#475569 100%);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:3em;"></div>`
                     }
                     <h3>${car.name}</h3>
                     <div class="price">${car.price || 'Negotiable'}</div>
                     <p style="color:#666;font-size:0.9em;">${car.description ? car.description.substring(0, 100) + '...' : 'No description'}</p>
                     <span class="status-badge ${car.is_available ? 'status-available' : 'status-sold'}">
-                        ${car.is_available ? '✅ For Sale' : '❌ Sold'}
+                        ${car.is_available ? ' For Sale' : ' Sold'}
                     </span>
-                    ${car.images && car.images.length > 0 
+                    ${car.images && car.images.length > 0
                         ? `<div class="image-gallery">${car.images.map(img => `<img src="${img}" alt="">`).join('')}</div>`
                         : ''
                     }
@@ -147,7 +151,7 @@
                         <button class="btn btn-secondary btn-small" style="background:#b91c1c;" onclick="deleteCar('${car.id}')">Delete</button>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         async function toggleAvailability(carId, available) {
@@ -187,5 +191,6 @@
         // Load on page load
         loadForSaleCars();
     </script>
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
 </body>
 </html>

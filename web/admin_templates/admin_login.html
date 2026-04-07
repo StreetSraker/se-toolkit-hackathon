@@ -5,28 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - JDM Service Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .login-form {
+            max-width: 400px;
+            margin: 60px auto;
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px var(--shadow-primary);
+            border: 2px solid var(--border-primary);
+        }
+        .login-form h2 {
+            margin-top: 0;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .login-form .form-group {
+            margin-bottom: 16px;
+        }
+        .login-form .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .login-form .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
+        .login-form .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+        .login-form button[type="submit"] {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .login-form .register-link {
+            text-align: center;
+            margin-top: 16px;
+            color: var(--text-tertiary);
+        }
+        .login-form .register-link a {
+            color: var(--accent-secondary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-form .register-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🔧 Service Panel</h1>
-            <p class="subtitle">JDM Config Order Management System</p>
+            <h1 data-i18n="common.service_panel"> Service Panel</h1>
+            <p class="subtitle" data-i18n="common.jdm_subtitle">JDM Config Order Management System</p>
         </header>
 
         <!-- Login Form -->
-        <div id="adminLogin" class="login-form">
-            <h2>🔐 Service Panel Login</h2>
+        <div id="serviceLogin" class="login-form">
+            <h2 data-i18n="admin.login_title"> Service Login</h2>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" class="input-field" placeholder="Enter password" required>
+                    <label for="username" data-i18n="common.username">Username</label>
+                    <input type="text" id="username" class="input-field" data-i18n-placeholder="admin.enter_username" placeholder="Enter your username" required autocomplete="username">
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <div class="form-group">
+                    <label for="password" data-i18n="common.password">Password</label>
+                    <input type="password" id="password" class="input-field" data-i18n-placeholder="admin.enter_password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" data-i18n="common.login">Login</button>
                 <p id="loginError" class="error-message hidden"></p>
             </form>
+            <p class="register-link">
+                <span data-i18n="admin.no_account">Don't have an account?</span> <a href="/register" data-i18n="admin.register_here">Register here</a>
+            </p>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin_auth.js') }}"></script>
 </body>
 </html>

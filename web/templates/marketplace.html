@@ -9,8 +9,8 @@
         .marketplace-header {
             text-align: center;
             padding: 40px 20px;
-            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-            color: white;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
             border-radius: 12px;
             margin-bottom: 30px;
         }
@@ -28,16 +28,18 @@
             gap: 24px;
         }
         .marketplace-card {
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px var(--shadow-primary);
             transition: transform 0.2s, box-shadow 0.2s;
             cursor: pointer;
+            border: 2px solid var(--border-primary);
         }
         .marketplace-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px var(--shadow-primary);
+            border-color: var(--accent-primary);
         }
         .marketplace-card img {
             width: 100%;
@@ -49,34 +51,34 @@
         }
         .marketplace-card h3 {
             margin: 0 0 8px 0;
-            color: #1a1a2e;
+            color: var(--text-secondary);
             font-size: 1.3em;
         }
         .marketplace-card .price {
             font-size: 1.6em;
             font-weight: bold;
-            color: #64748b;
+            color: var(--accent-primary);
             margin: 12px 0;
         }
         .marketplace-card .description {
-            color: #666;
+            color: var(--text-tertiary);
             font-size: 0.95em;
             line-height: 1.5;
             margin-bottom: 12px;
         }
         .marketplace-card .mods-preview {
-            background: #f8f9fa;
+            background: var(--bg-tertiary);
             padding: 12px;
             border-radius: 8px;
             font-size: 0.85em;
-            color: #495057;
+            color: var(--text-tertiary);
         }
         .image-count {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            background: rgba(102, 126, 234, 0.1);
-            color: #64748b;
+            background: rgba(100, 116, 139, 0.2);
+            color: var(--accent-primary);
             padding: 4px 10px;
             border-radius: 12px;
             font-size: 0.85em;
@@ -85,7 +87,7 @@
         .no-cars {
             text-align: center;
             padding: 60px 20px;
-            color: #666;
+            color: var(--text-tertiary);
         }
         .no-cars .icon {
             font-size: 4em;
@@ -96,26 +98,38 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1>🚗 Marketplace</h1>
+            <h1 data-i18n="index.marketplace"> Marketplace</h1>
             <nav class="main-nav">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/configurator" class="nav-link">Configurator</a>
-                <a href="/marketplace" class="nav-link active">Marketplace</a>
-                <a href="/orders" class="nav-link">Orders</a>
+                <a href="/" class="nav-link" data-i18n="configurator.home">Home</a>
+                <a href="/configurator" class="nav-link" data-i18n="configurator.configurator">Configurator</a>
+                <a href="/marketplace" class="nav-link active" data-i18n="index.marketplace">Marketplace</a>
+                <a href="/orders" class="nav-link" data-i18n="index.myOrders">Orders</a>
+                <a href="/profile" class="nav-link" data-i18n="index.profile">Profile</a>
+                <button onclick="handleLogout()" class="btn btn-secondary btn-small" data-i18n="common.logout">Logout</button>
             </nav>
         </header>
 
         <div class="marketplace-header">
-            <h1>Ready-Made Projects</h1>
-            <p>Pre-modified JDM cars from our service</p>
+            <h1 data-i18n="marketplace.readyMade">Ready-Made Projects</h1>
+            <p data-i18n="marketplace.readyMadeDesc">Pre-modified JDM cars from our service</p>
         </div>
 
         <div id="marketplaceGrid" class="marketplace-grid">
-            <p class="loading">Loading...</p>
+            <p class="loading" data-i18n="common.loading">Loading...</p>
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script>
+        async function handleLogout() {
+            try {
+                await fetch('/api/auth/logout', { method: 'POST' });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+
         async function loadMarketplace() {
             try {
                 const response = await fetch('/api/marketplace');
@@ -123,21 +137,21 @@
                 renderCars(cars);
             } catch (error) {
                 console.error('Error loading marketplace:', error);
-                document.getElementById('marketplaceGrid').innerHTML = 
-                    '<p class="error">Loading error</p>';
+                document.getElementById('marketplaceGrid').innerHTML =
+                    '<p class="error">' + i18n.t('common.error') + '</p>';
             }
         }
 
         function renderCars(cars) {
             const grid = document.getElementById('marketplaceGrid');
-            
+
             if (cars.length === 0) {
                 grid.innerHTML = `
                     <div class="no-cars">
-                        <div class="icon">🔍</div>
-                        <h2>No Cars Available Yet</h2>
-                        <p>Stay tuned for updates or order a custom project</p>
-                        <a href="/configurator" class="btn btn-primary" style="margin-top: 20px;">
+                        <div class="icon"></div>
+                        <h2 data-i18n="marketplace.noCars">No Cars Available Yet</h2>
+                        <p data-i18n="marketplace.stayTuned">Stay tuned for updates or order a custom project</p>
+                        <a href="/configurator" class="btn btn-primary" style="margin-top: 20px;" data-i18n="marketplace.buildOwn">
                             Build Your Own Project
                         </a>
                     </div>
@@ -147,22 +161,22 @@
 
             grid.innerHTML = cars.map(car => `
                 <div class="marketplace-card" onclick="window.location.href='/marketplace/${car.id}'">
-                    ${car.images && car.images.length > 0 
+                    ${car.images && car.images.length > 0
                         ? `<img src="${car.images[0]}" alt="${car.name}">`
-                        : `<div style="width:100%;height:220px;background:linear-gradient(135deg,#64748b 0%,#475569 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:4em;">🚗</div>`
+                        : `<div style="width:100%;height:220px;background:linear-gradient(135deg,var(--accent-primary) 0%,var(--bg-secondary) 100%);display:flex;align-items:center;justify-content:center;color:white;font-size:4em;"></div>`
                     }
                     <div class="marketplace-card-content">
                         <h3>${car.name}</h3>
-                        <div class="price">${car.price || 'By arrangement'}</div>
-                        <p class="description">${car.description ? car.description.substring(0, 120) + '...' : 'No description'}</p>
+                        <div class="price">${car.price || i18n.t('marketplace.byAgreement')}</div>
+                        <p class="description">${car.description ? car.description.substring(0, 120) + '...' : i18n.t('marketplace.noDesc')}</p>
                         ${car.questionnaire && car.questionnaire.mods_list
                             ? `<div class="mods-preview">
-                                <strong>Modifications:</strong> ${car.questionnaire.mods_list.substring(0, 80)}...
+                                <strong data-i18n="marketplace.modifications">Modifications:</strong> ${car.questionnaire.mods_list.substring(0, 80)}...
                                </div>`
                             : ''
                         }
                         ${car.images && car.images.length > 0
-                            ? `<div class="image-count">📸 ${car.images.length} photo(s)</div>`
+                            ? `<div class="image-count"> ${car.images.length} photo(s)</div>`
                             : ''
                         }
                     </div>

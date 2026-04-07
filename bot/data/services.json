@@ -1,0 +1,32 @@
+[
+  {
+    "id": "SVC-0001",
+    "name": "ProjectD",
+    "username": "projectd",
+    "password_hash": "scrypt:32768:8:1$QydPN63UP9MwbF9d$6cb7f4ab30e3ac37665fa1a905d2258bd41389551e6dc0ab440df43e621c177a9b6cc550c9445c770534e0e25da3cb3bd2e339a8625c62a146eb9f2298b74930",
+    "telegram_username": "@ProjectD",
+    "phone": "+x (xxx) xxx-xx-xx",
+    "specialties": [
+      "Body works",
+      "Engine",
+      "Suspension"
+    ],
+    "is_active": true,
+    "registered_at": "2026-04-07 16:23:09"
+  },
+  {
+    "id": "SVC-0002",
+    "name": "BigCustoms",
+    "username": "bigcustoms",
+    "password_hash": "scrypt:32768:8:1$dAaL4gcyhGtxjwYd$15e33685dec5e02c9ef6f65e3bd2b6c2aea73f3989472d52acb6246283d4253c6776f13af11336cdc2fcdba42fd8876b42b21d5cf7248408ee2a844c44bf38bb",
+    "telegram_username": "@BigCustoms",
+    "phone": "+x (xxx) xxx-xx-xx",
+    "specialties": [
+      "Body",
+      "Paint",
+      "Engine"
+    ],
+    "is_active": true,
+    "registered_at": "2026-04-07 16:24:19"
+  }
+]
