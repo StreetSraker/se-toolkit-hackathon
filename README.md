@@ -1,213 +1,348 @@
-# Lab 9 - Quiz and Hackathon
+# JDM Car Configurator 🚗
 
-The lab opens with a quiz and then kicks off the hackathon.
+A Telegram bot and web platform for ordering and configuring classic 90s/00s JDM cars with custom modifications.
 
-To get the full point for the lab, you need to:
+---
 
-- Pass Tasks 1, 2, 3 during the lab AND
-- Finish Tasks 4 and 5 by the usual deadline of Thursday 23:59.
+## Demo
 
-Each student builds their own project:
+### Client Website - Car Configurator
+![Car Configurator](Images/demo/configurator_demo.png)
 
-- Go from an idea to a deployed product.
-- Use agents and LLMs throughout.
+### Client Website - Marketplace
+![Marketplace](Images/demo/marketplace_demo.png)
 
-----
+### Admin Panel - Order Management
+![Admin Panel](Images/demo/admin_demo.png)
 
-## Task 1 (graded by TA after the lab)
+### Telegram Bot
+![Telegram Bot](Images/demo/bot_demo.png)
 
-Pen and paper quiz:
+---
 
-- 20 mins;
-- closed book, no devices;
-- you get 3 random questions from the question bank;
-- answer at least 2.
+## Product Context
 
-## Task 2 (approved by TA during the lab)
+### End Users
 
-Ideate and plan your project.
+- **Car Enthusiasts** — Fans of classic JDM cars (90s/00s era) who want to order and customize vehicles
+- **Car Service Centers** — Technicians and shops that fulfill custom car build orders
 
-### Project idea
+### Problem
 
-The project idea must be:
+Enthusiasts of classic JDM cars lack a streamlined platform to:
+- Browse available 90s/00s JDM models
+- Configure custom builds (engine swaps, suspensions, bodykits, wheels)
+- Place orders with service centers
+- Track order progress
 
-- something simple to build;
-- clearly useful;
-- easy to explain.
+Service centers lack a centralized system to:
+- Receive and manage custom build orders
+- Claim jobs and communicate with clients
+- Track statistics and workload
 
-Define and show to your TA:
+### Solution
 
-- End-user of the product
-- What problem your product solves for the end-user?
-- The product idea in one short sentence.
-- What is the product's core feature?
+A multi-platform system with:
+- **Telegram Bot** — Quick access to order tracking and notifications
+- **Client Website** — Interactive car configurator with step-by-step customization
+- **Admin Panel** — Service center dashboard for order management and analytics
 
-### Implementation plan
+---
 
-When the idea is approved, produce a plan for two product versions.
+## Features
 
-Version 1 does one core thing well:
+### Implemented ✅
 
-- Pick the one feature most valuable to the end-user and relatively easy to implement;
-- It is a functioning product, not a prototype;
-- Must be shown to the TA upon completion for feedback.
+#### Client Website (Port 5000)
+- User registration and authentication
+- Interactive car configurator with 10 JDM models:
+  - Toyota Supra A80, Nissan Skyline R34 GT-R, Mazda RX-7 FD, Honda NSX
+  - Nissan Silvia S15, Toyota Chaser JZX100, Honda Civic Type R EK9
+  - Mitsubishi Lancer Evolution VI, Subaru Impreza WRX STI GC8, Toyota AE86
+- Customization options:
+  - **Engines** — 6 options per car (stock, built, stroker, swaps, custom)
+  - **Suspensions** — 7 setups (stock, street, sport, drift, track, stance, custom)
+  - **Bodykits** — 6 styles (stock, Rocket Bunny, VARIS, N1/Origin, Pandem, custom)
+  - **Wheels** — 13 options (Rays Volk, Work, SSR, Advan, Enkei, BBS, OZ, etc.)
+- 8 pre-configured preset builds (Drift, Track, Stance, Street, Rally, Touge)
+- Order placement and tracking
+- Marketplace for pre-modified cars for sale
+- User profile management
+- Mobile responsive design
+- Internationalization (English & Russian)
 
-Version 2 builds upon Version 1:
+#### Admin Panel (Port 5001)
+- Service center registration and authentication
+- Order management (view, claim, release, update status)
+- Per-service data isolation
+- Statistics and analytics (order counts, popular cars, conversion rates)
+- Service management (register, edit, deactivate services)
+- Marketplace management (add/edit/remove cars for sale, image uploads)
+- Service profile management
 
-- Improves the initial feature or adds another one on top;
-- Address TA feedback from the lab;
-- Deploy and make it available for use.
+#### Telegram Bot
+- User registration and authentication
+- Order listing with status tracking
+- Order detail view with full configuration
+- Assigned service contact information
+- Status history timeline
 
-The product must have the following components, each fulfilling a useful function:
+#### Infrastructure
+- Docker containerization (3 services)
+- Shared persistent storage (JSON-based database)
+- Deployment scripts
+- Health checks for all services
 
-- backend;
-- database;
-- end-user-facing client: web app, mobile app, or LLM-powered agent, e.g. `nanobot`.
+### Not Yet Implemented 🚧
 
-Note:
+- Real-time order status notifications (push to Telegram)
+- Payment processing integration
+- Image upload for custom builds
+- Advanced search and filtering in marketplace
+- Order comments/messaging between client and service
+- Email notifications
+- Multi-language support in Telegram bot
+- Admin role-based access control
+- Export orders to PDF
+- Car image gallery for configurator (SVG placeholders used)
 
-- You can use the setup from Lab 8 or start from scratch.
-- `Telegram` bots are blocked on university VMs.
+---
 
-## Task 3 (approved by TA during the lab)
+## Usage
 
-Implement Version 1 outlined in the plan:
+### For Car Enthusiasts
 
-- Build one core feature;
-- Follow best practices and git workflow;
-- Test it yourself and fix bugs;
-- Have the TA try it as a user;
-- Take note of the TA feedback;
-- Get TA's approval for the task to be marked as DONE.
+1. **Via Website:**
+   - Open `http://YOUR_SERVER_IP:5000`
+   - Register an account
+   - Browse available JDM cars
+   - Use the configurator to customize your build
+   - Place an order and track its progress
 
-## Task 4
+2. **Via Telegram:**
+   - Find the bot by its username
+   - Send `/start` to begin
+   - Register with username and password
+   - View your orders and their status
 
-Implement and deploy Version 2 outlined in the plan:
+### For Service Centers
 
-- Build and polish functionality;
-- Take TA feedback into account;
-- Push all code to the GitHub repo (see the detailed instructions below);
-- Follow best practices and git workflow;
-- Document your solution;
-- Dockerize all services;
-- Deploy it to be accessible to use.
+1. Open `http://YOUR_SERVER_IP:5001`
+2. Register as a service center
+3. Browse available orders
+4. Claim orders you want to fulfill
+5. Update order status as work progresses
+6. View statistics on your dashboard
 
-Version 2 can be completed during the lab or after it, before the usual deadline.
+### For Marketplace Sellers
 
-## Task 5 (demo and PDF submitted through Moodle)
+1. Log in to the Admin Panel
+2. Navigate to "For Sale" section
+3. Add pre-modified cars with details and images
+4. Manage listings (edit, remove)
 
-Submit a presentation with five slides:
+---
 
-1. Title:
+## Deployment
 
-   - Product title
-   - Your name
-   - Your university email
-   - Your group
+### Prerequisites
 
-2. Context:
+- **OS:** Ubuntu 24.04 (or any Linux with Docker support)
+- **Docker** (version 20.10 or higher)
+- **Docker Compose** (version 2.0 or higher)
+- **Git**
+- **Telegram account** (to create a bot via @BotFather)
 
-   - End-user of the product
-   - What problem your product solves
-   - The product idea in one short sentence
+### Step-by-Step Instructions
 
-3. Implementation:
-
-   - How you built the product
-   - What went into Version 1 and Version 2
-   - What TA feedback points you addressed
-
-4. Demo:
-
-   - Pre-recorded video demonstration of Version 2 with voice-over (no longer than 2 minutes).
-   - _Note:_ **This is the most important part of the presentation**.
-
-5. Links:
-
-   - Link and QR code for each of these:
-     - The GitHub repo with the product code
-     - Deployed product (latest version)
-
-----
-
-## Quick Deployment
-
-### Docker Deployment (Recommended)
-
-The easiest way to deploy all services:
+#### 1. Install Docker
 
 ```bash
-# 1. Configure your bot token
-cp .env.example .env
-nano .env  # Add your BOT_TOKEN from @BotFather
+# Update package index
+sudo apt update
 
-# 2. Deploy everything
+# Install prerequisites
+sudo apt install -y ca-certificates curl gnupg
+
+# Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Add your user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+#### 2. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/se-toolkit-hackathon.git
+cd se-toolkit-hackathon
+```
+
+#### 3. Configure Environment Variables
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Edit the `.env` file:
+
+```bash
+# Get this from @BotFather on Telegram
+BOT_TOKEN=your_actual_bot_token_here
+
+# Change for production!
+ADMIN_PASSWORD=service2024
+
+# Use strong random strings in production
+SECRET_KEY=jdm-config-secret-key-2024
+ADMIN_SECRET_KEY=jdm-admin-secret-key-2024
+
+# Set to False in production
+FLASK_DEBUG=False
+
+PORT=5000
+ADMIN_PORT=5001
+```
+
+#### 4. Create Telegram Bot
+
+1. Open Telegram and search for **@BotFather**
+2. Send `/newbot`
+3. Choose a name (e.g., "JDM Configurator")
+4. Choose a username (must end in `bot`, e.g., `jdm_config_bot`)
+5. Copy the token and paste it into `.env`
+
+#### 5. Deploy
+
+```bash
+# Build and start all services
 ./deploy.sh
 
-# 3. Check status
-docker compose ps
+# Or manually
+docker compose up -d --build
 ```
 
-**Access your services:**
-- 🚗 **Client Website:** http://YOUR_SERVER_IP:5000
-- 🔧 **Admin Panel:** http://YOUR_SERVER_IP:5001 (Password: service2024)
-- 🤖 **Telegram Bot:** Search for your bot username on Telegram
-
-### Manual Deployment (Without Docker)
+#### 6. Verify Deployment
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
+# Check all containers are running
+docker compose ps
 
-# Configure environment
-cp .env.example .env
-nano .env  # Edit settings
-
-# Start services (in separate terminals)
-python -m bot.main               # Telegram Bot
-python web/client_app.py         # Client Website (Port 5000)
-python web/admin_app.py          # Admin Website (Port 5001)
+# View logs
+docker compose logs -f
 ```
 
-For detailed deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)
+#### 7. Access Services
 
-----
+| Service | URL | Description |
+|---------|-----|-------------|
+| Client Website | `http://YOUR_IP:5000` | Car configurator for customers |
+| Admin Panel | `http://YOUR_IP:5001` | Order management (Password: `service2024`) |
+| Telegram Bot | Search on Telegram | Bot interface |
 
-## Publishing the product code on GitHub
+Get your server IP:
+```bash
+curl ifconfig.me
+```
 
-- Publish the product code in a repository on `GitHub`.
+#### 8. Configure Firewall (if needed)
 
-  The repository must be called `se-toolkit-hackathon`.
+```bash
+sudo ufw allow 5000/tcp
+sudo ufw allow 5001/tcp
+```
 
-- Add the MIT license file to make your product open-source.
+### Managing Services
 
-- Add `README.md` in the product repository.
+```bash
+# Stop all services
+docker compose down
 
-  `README.md` structure:
+# Restart all services
+docker compose restart
 
-  - Product name (as title)
+# Restart specific service
+docker compose restart bot
 
-  - One-line description
+# View logs
+docker compose logs -f bot
+./logs.sh all
 
-  - Demo:
-    - A couple of relevant screenshots of the product
+# Update and rebuild
+git pull
+docker compose up -d --build
 
-  - Product context:
+# Complete reset (removes data)
+docker compose down -v
+docker compose up -d --build
+```
 
-    - End users
-    - Problem that your product solves for end users
-    - Your solution
+---
 
-  - Features:
+## Architecture
 
-    - Implemented and not yet implemented features
+```
+┌─────────────────────────────────────────┐
+│         Docker Network                  │
+│                                         │
+│  ┌──────────────┐                       │
+│  │  jdm-bot     │ ← Telegram Bot        │
+│  │  (Polling)   │    Polls Telegram API │
+│  └──────┬───────┘                       │
+│         │                               │
+│  ┌──────┴───────┐  ┌──────────────────┐ │
+│  │ jdm-client   │  │  jdm-admin       │ │
+│  │ Port 5000    │  │  Port 5001       │ │
+│  │ (Public)     │  │  (Password)      │ │
+│  └──────┬───────┘  └──────┬───────────┘ │
+│         │                  │             │
+│  ┌──────┴──────────────────┴──────────┐ │
+│  │      Shared Volume: bot_data       │ │
+│  │      (JSON storage)                │ │
+│  └────────────────────────────────────┘ │
+└─────────────────────────────────────────┘
+```
 
-  - Usage:
+### Services
 
-    - Explain how to use your product
+1. **jdm-bot** — Telegram bot (polling-based, no exposed port)
+2. **jdm-client** — Client website (Port 5000)
+3. **jdm-admin** — Admin panel (Port 5001)
 
-  - Deployment:
+### Data Storage
 
-    - Which OS the VM should run on (you may assume `Ubuntu 24.04` like on your university VMs)
-    - What should be installed on the VM
-    - Step-by-step deployment instructions
+JSON-based persistent storage shared via Docker volume:
+- `orders.json` — All order data
+- `users.json` — Client user accounts
+- `services.json` — Service center accounts
+- `for_sale_cars.json` — Marketplace listings
+
+---
+
+## Tech Stack
+
+- **Backend:** Python 3.11, Flask 3.0+, python-telegram-bot 21.0+
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (ES6+)
+- **Containerization:** Docker + Docker Compose
+- **Storage:** JSON files (file-based database)
+- **Internationalization:** English & Russian
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
