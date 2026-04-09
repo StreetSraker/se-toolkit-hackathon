@@ -122,6 +122,9 @@ A multi-platform system with:
 
 ## Deployment
 
+> **Note:** All services run on **localhost** since the VM IP is treated as localhost.
+> Access services from within the VM using `http://localhost:<port>`.
+
 ### Prerequisites
 
 - **OS:** Ubuntu 24.04 (or any Linux with Docker support)
@@ -129,6 +132,175 @@ A multi-platform system with:
 - **Docker Compose** (version 2.0 or higher)
 - **Git**
 - **Telegram account** (to create a bot via @BotFather)
+
+### Quick Deploy (5 minutes)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/se-toolkit-hackathon.git
+cd se-toolkit-hackathon
+
+# 2. Configure environment
+cp .env.example .env
+nano .env  # Edit BOT_TOKEN and other settings
+
+# 3. Deploy
+./deploy.sh
+```
+
+### Step-by-Step Instructions
+
+#### 1. Install Docker
+
+```bash
+# Update package index
+sudo apt update
+
+# Install prerequisites
+sudo apt install -y ca-certificates curl gnupg
+
+# Add Docker's official GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+# Add Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# Add your user to docker group
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+#### 2. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/se-toolkit-hackathon.git
+cd se-toolkit-hackathon
+```
+
+#### 3. Configure Environment Variables
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+Edit the `.env` file:
+
+```bash
+# Get this from @BotFather on Telegram
+BOT_TOKEN=your_actual_bot_token_here
+
+# Change for production!
+ADMIN_PASSWORD=service2024
+
+# Use strong random strings in production
+SECRET_KEY=jdm-config-secret-key-2024
+ADMIN_SECRET_KEY=jdm-admin-secret-key-2024
+
+# Set to False in production
+FLASK_DEBUG=False
+
+PORT=5000
+ADMIN_PORT=5001
+```
+
+#### 4. Create Telegram Bot
+
+1. Open Telegram and search for **@BotFather**
+2. Send `/newbot`
+3. Choose a name (e.g., "JDM Configurator")
+4. Choose a username (must end in `bot`, e.g., `jdm_config_bot`)
+5. Copy the token and paste it into `.env`
+
+#### 5. Deploy
+
+```bash
+# Build and start all services
+./deploy.sh
+
+# Or manually
+docker compose up -d --build
+```
+
+#### 6. Verify Deployment
+
+```bash
+# Check all containers are running
+docker compose ps
+
+# View logs
+docker compose logs -f
+```
+
+#### 7. Access Services
+
+All services are accessible via **localhost** from within the VM:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| Client Website | `http://localhost:5000` | Car configurator for customers |
+| Admin Panel | `http://localhost:5001` | Order management (Password: `service2024`) |
+| Telegram Bot | Search on Telegram | Bot interface |
+
+#### 8. Configure Firewall (if needed)
+
+```bash
+sudo ufw allow 5000/tcp
+sudo ufw allow 5001/tcp
+```
+
+### Managing Services
+
+```bash
+# Stop all services
+docker compose down
+
+# Restart all services
+docker compose restart
+
+# Restart specific service
+docker compose restart bot
+
+# View logs
+docker compose logs -f bot
+./logs.sh all
+
+# Update and rebuild
+git pull
+docker compose up -d --build
+
+# Complete reset (removes data)
+docker compose down -v
+docker compose up -d --build
+```
+
+### Troubleshooting
+
+**Bot not starting?**
+```bash
+docker compose logs bot
+# Verify BOT_TOKEN is valid from @BotFather
+```
+
+**Website not accessible?**
+```bash
+docker compose ps           # Check containers are running
+docker compose logs client  # Check for errors
+sudo ufw allow 5000/tcp     # Open firewall
+```
+
+**Need full details?** See [DEPLOYMENT.md](DEPLOYMENT.md) for the comprehensive guide.
+
+---
 
 ## Architecture
 
