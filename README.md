@@ -12,9 +12,6 @@ A Telegram bot and web platform for ordering and configuring classic 90s/00s JDM
 ### Client Website - Marketplace
 ![Marketplace](Images/demo/marketplace_demo.png)
 
-### Admin Panel - Order Management
-![Admin Panel](Images/demo/admin_demo.png)
-
 ### Telegram Bot
 ![Telegram Bot](Images/demo/bot_demo.png)
 
@@ -45,7 +42,7 @@ Service centers lack a centralized system to:
 A multi-platform system with:
 - **Telegram Bot** — Quick access to order tracking and notifications
 - **Client Website** — Interactive car configurator with step-by-step customization
-- **Admin Panel** — Service center dashboard for order management and analytics
+- **Service Website** — Service center dashboard for order management and analytics
 
 ---
 
@@ -71,7 +68,7 @@ A multi-platform system with:
 - Mobile responsive design
 - Internationalization (English & Russian)
 
-#### Admin Panel (Port 5001)
+#### Service Panel (Port 5001)
 - Service center registration and authentication
 - Order management (view, claim, release, update status)
 - Per-service data isolation
@@ -92,19 +89,6 @@ A multi-platform system with:
 - Shared persistent storage (JSON-based database)
 - Deployment scripts
 - Health checks for all services
-
-### Not Yet Implemented 🚧
-
-- Real-time order status notifications (push to Telegram)
-- Payment processing integration
-- Image upload for custom builds
-- Advanced search and filtering in marketplace
-- Order comments/messaging between client and service
-- Email notifications
-- Multi-language support in Telegram bot
-- Admin role-based access control
-- Export orders to PDF
-- Car image gallery for configurator (SVG placeholders used)
 
 ---
 
@@ -133,13 +117,6 @@ A multi-platform system with:
 4. Claim orders you want to fulfill
 5. Update order status as work progresses
 6. View statistics on your dashboard
-
-### For Marketplace Sellers
-
-1. Log in to the Admin Panel
-2. Navigate to "For Sale" section
-3. Add pre-modified cars with details and images
-4. Manage listings (edit, remove)
 
 ---
 
@@ -353,7 +330,7 @@ sudo ufw allow 5000/tcp     # Open firewall
 
 1. **jdm-bot** — Telegram bot (polling-based, no exposed port)
 2. **jdm-client** — Client website (Port 5000)
-3. **jdm-admin** — Admin panel (Port 5001)
+3. **jdm-admin** — Service panel (Port 5001)
 
 ### Data Storage
 
