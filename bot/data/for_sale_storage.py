@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'db')
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 FOR_SALE_FILE = os.path.join(DATA_DIR, 'for_sale_cars.json')
 
 # Store images inside the shared bot_data volume so they survive container rebuilds

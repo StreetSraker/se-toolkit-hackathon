@@ -143,7 +143,12 @@ async def show_main_menu(update, context) -> int:
         f"📊 You have <b>{len(my_orders)}</b> order(s).\n\n"
         f"Choose an action:"
     )
-    await _edit(update, text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
+    
+    # Check if we can edit (callback query) or need to reply (regular message)
+    if update.callback_query:
+        await _edit(update, text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
+    else:
+        await update.message.reply_text(text, parse_mode='HTML', reply_markup=_main_menu_keyboard())
     return MAIN_MENU
 
 
@@ -344,7 +349,7 @@ async def handle_reg_skip(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             reply_markup=ForceReply()
         )
         return REG_EMAIL
-    elif state == REG_EMAIL:
+    elif reg_step == 'email':
         context.user_data['reg_data']['email'] = ''
         return await complete_registration(update, context)
     return REG_TELEGRAM
@@ -517,6 +522,8 @@ def build_application():
             MAIN_MENU: [
                 CallbackQueryHandler(menu_handler, pattern='^(my_orders|about|back_to_main)$'),
                 CallbackQueryHandler(lambda u, c: show_order_detail(u, c, u.callback_query.data.replace('order_', '')), pattern='^order_'),
+                CallbackQueryHandler(show_login_form, pattern='^auth_login$'),
+                CallbackQueryHandler(show_register_form, pattern='^auth_register$'),
             ],
             AUTH_USERNAME: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_auth_username),
@@ -549,6 +556,8 @@ def build_application():
         fallbacks=[
             CommandHandler('start', cmd_start),
             CommandHandler('cancel', cmd_cancel),
+            CallbackQueryHandler(show_login_form, pattern='^auth_login$'),
+            CallbackQueryHandler(show_register_form, pattern='^auth_register$'),
         ],
     )
 

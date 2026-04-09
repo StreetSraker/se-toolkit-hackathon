@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from werkzeug.security import generate_password_hash, check_password_hash
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'db')
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 SERVICES_FILE = os.path.join(DATA_DIR, 'services.json')
 
 

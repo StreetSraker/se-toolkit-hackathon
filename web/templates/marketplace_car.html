@@ -267,6 +267,8 @@
             font-size: 1.1em;
             margin-top: 16px;
             transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
         }
         .contact-btn:hover {
             transform: scale(1.05);
@@ -466,10 +468,41 @@
                 <div class="contact-section">
                     <h3>Interested in this car?</h3>
                     <p>Contact us for more information or to schedule a viewing</p>
-                    <a href="https://t.me/your_bot_username" class="contact-btn" target="_blank">
-                         Message on Telegram
-                    </a>
+                    ${getTelegramButton(car.seller)}
                 </div>
+
+                <!-- Contacts -->
+                ${car.seller ? `
+                <div class="car-info" style="margin-top: 24px;">
+                    <h3>📞 Contact Information</h3>
+                    <div class="questionnaire-section" style="margin: 0; background: transparent; padding: 0;">
+                        <div class="questionnaire-grid">
+                            <div class="questionnaire-item">
+                                <div class="label">Seller</div>
+                                <div class="value">${car.seller.name}</div>
+                            </div>
+                            ${car.seller.telegram_username ? `
+                            <div class="questionnaire-item">
+                                <div class="label">Telegram</div>
+                                <div class="value">
+                                    <a href="https://t.me/${car.seller.telegram_handle || car.seller.telegram_username.replace('@', '')}" target="_blank" style="color: var(--accent-primary); text-decoration: none;">
+                                        ${car.seller.telegram_username}
+                                    </a>
+                                </div>
+                            </div>` : ''}
+                            ${car.seller.phone ? `
+                            <div class="questionnaire-item">
+                                <div class="label">Phone</div>
+                                <div class="value">${car.seller.phone}</div>
+                            </div>` : ''}
+                            ${questionnaire.location ? `
+                            <div class="questionnaire-item">
+                                <div class="label">Location</div>
+                                <div class="value">📍 ${questionnaire.location}</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>` : ''}
             `;
         }
 
@@ -678,6 +711,41 @@
                 'project': 'Project'
             };
             return conditions[condition] || condition;
+        }
+
+        function getTelegramButton(seller) {
+            if (!seller) {
+                return '<p style="margin-top: 16px; opacity: 0.9;">Contact information not available</p>';
+            }
+            
+            // Use telegram_handle (the actual username) or fall back to telegram_username
+            let telegramHandle = seller.telegram_handle || '';
+            
+            // If no handle, try to extract from telegram_username
+            if (!telegramHandle && seller.telegram_username) {
+                telegramHandle = seller.telegram_username.replace('@', '');
+            }
+            
+            if (telegramHandle) {
+                return `<a href="https://t.me/${telegramHandle}" class="contact-btn" target="_blank">
+                    Message on Telegram
+                </a>`;
+            }
+            
+            return '<p style="margin-top: 16px; opacity: 0.9;">Telegram contact not available</p>';
+        }
+
+        function copyContactInfo(contact) {
+            navigator.clipboard.writeText(contact).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
         }
 
         // Load car on page load
