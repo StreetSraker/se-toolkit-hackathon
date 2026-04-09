@@ -97,7 +97,7 @@ A multi-platform system with:
 ### For Car Enthusiasts
 
 1. **Via Website:**
-   - Open `http://10.93.25.206:5000`
+   - Open `http://localhost:5000`
    - Register an account
    - Browse available JDM cars
    - Use the configurator to customize your build
@@ -111,7 +111,7 @@ A multi-platform system with:
 
 ### For Service Centers
 
-1. Open `http://10.93.25.206:5001`
+1. Open `http://localhost:5001`
 2. Register as a service center
 3. Browse available orders
 4. Claim orders you want to fulfill
