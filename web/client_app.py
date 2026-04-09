@@ -12,6 +12,7 @@ from bot.data.car_config_data import CARS, ENGINES, SUSPENSIONS, BODYKITS, WHEEL
 from bot.data.storage import save_order, get_all_orders, get_order
 from bot.data.for_sale_storage import get_all_cars, get_car, UPLOADS_DIR as FOR_SALE_UPLOADS_DIR
 from bot.data.users_storage import register_user, authenticate_user, get_user, get_user_by_username, update_user
+from bot.data.services_storage import get_service
 from werkzeug.security import generate_password_hash
 
 app = Flask(__name__,
@@ -341,6 +342,18 @@ def api_get_order(order_id):
 def api_get_marketplace():
     """Get all available cars for sale"""
     cars = get_all_cars(available_only=True)
+    # Enrich cars with service contact info
+    for car in cars:
+        service_id = car.get('created_by_service_id')
+        if service_id:
+            service = get_service(service_id)
+            if service:
+                car['seller'] = {
+                    'name': service.get('name', ''),
+                    'telegram_username': service.get('telegram_username', ''),
+                    'telegram_handle': service.get('username', ''),
+                    'phone': service.get('phone', ''),
+                }
     return jsonify(cars)
 
 
@@ -350,6 +363,17 @@ def api_get_marketplace_car(car_id):
     car = get_car(car_id)
     if not car or not car.get('is_available', True):
         return jsonify({'error': 'Car not found'}), 404
+    # Enrich with service contact info
+    service_id = car.get('created_by_service_id')
+    if service_id:
+        service = get_service(service_id)
+        if service:
+            car['seller'] = {
+                'name': service.get('name', ''),
+                'telegram_username': service.get('telegram_username', ''),
+                'telegram_handle': service.get('username', ''),
+                'phone': service.get('phone', ''),
+            }
     return jsonify(car)
 
 
